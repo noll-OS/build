@@ -36,6 +36,10 @@ PRODUCT_PACKAGES += \
     make_f2fs \
     requestsync \
 
+ifeq ($(OFFICIAL_BUILD),true)
+    PRODUCT_PACKAGES += Updater
+endif
+
 ifeq ($(RELEASE_PACKAGE_COMPUTER_CONTROL),true)
   PRODUCT_PACKAGES += VirtualDeviceManager
 endif
