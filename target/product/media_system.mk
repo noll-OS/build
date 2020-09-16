@@ -40,6 +40,8 @@ ifeq ($(OFFICIAL_BUILD),true)
     PRODUCT_PACKAGES += Updater
 endif
 
+PRODUCT_PACKAGES += Seedvault
+
 ifeq ($(RELEASE_PACKAGE_COMPUTER_CONTROL),true)
   PRODUCT_PACKAGES += VirtualDeviceManager
 endif
