@@ -70,6 +70,7 @@ PRODUCT_PACKAGES += \
     SecureElement \
     SharedStorageBackup \
     SimAppDialog \
+    talkback \
     TeleService \
     Traceur \
     UserDictionaryProvider \
