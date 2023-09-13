@@ -15,6 +15,11 @@
 # gettop is duplicated here and in shell_utils.mk, because it's difficult
 # to find shell_utils.make without it for all the novel ways this file can be
 # sourced.  Other common functions should only be in one place or the other.
+
+umask 022
+# use shell built-in instead of the separate program which is missing by default on some distros
+alias which='command -v'
+
 function _gettop_once
 {
     local TOPFILE=build/make/core/envsetup.mk
@@ -473,11 +478,13 @@ function maybe_source_extra_commands() {
         return
     }
 
-    echo "============================================"
-    echo "Commands from $EXTRA_CMDS:"
-    cat $EXTRA_CMDS
+    [[ -n "${ANDROID_QUIET_BUILD:-}" ]] || {
+        echo "============================================"
+        echo "Commands from $EXTRA_CMDS:"
+        cat $EXTRA_CMDS
+        echo "============================================"
+    }
     source $EXTRA_CMDS
-    echo "============================================"
 }
 
 function _lunch_meat()
@@ -1223,3 +1230,15 @@ addcompletions
 if [[ "$USE_LEFTOVERS" -eq 1 ]]; then
   leftovers
 fi
+
+export LANG=C.UTF-8
+export BUILD_DATETIME=${BUILD_DATETIME:-$(cat ${OUT_DIR:-out}/build_date.txt 2>/dev/null || date -u +%s)}
+export BUILD_NUMBER=${BUILD_NUMBER:-$(cat ${OUT_DIR:-out}/soong/build_number.txt 2>/dev/null || date -u -d @$BUILD_DATETIME +%Y%m%d00)}
+export BUILD_USERNAME=android-user
+export BUILD_HOSTNAME=r-0123456789abcdef-0123
+
+echo "export BUILD_DATETIME=$BUILD_DATETIME BUILD_NUMBER=$BUILD_NUMBER"
+
+alias adevtool='vendor/adevtool/bin/run'
+alias adto='vendor/adevtool/bin/run'
+
