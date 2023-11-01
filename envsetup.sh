@@ -626,11 +626,11 @@ function lunch()
         product=$1
         release=$2
         if [[ -z $release ]]; then
-            release=trunk_staging
+            release=cur
         fi
         variant=$3
         if [[ -z $variant ]]; then
-            variant=eng
+            variant=userdebug
         fi
     fi
 
