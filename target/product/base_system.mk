@@ -523,6 +523,7 @@ PRODUCT_PACKAGES += init.zygote32.rc
 PRODUCT_SYSTEM_PROPERTIES += debug.atrace.tags.enableflags=0
 PRODUCT_SYSTEM_PROPERTIES += persist.traced.enable=1
 PRODUCT_SYSTEM_PROPERTIES += ro.surface_flinger.game_default_frame_rate_override=60
+PRODUCT_SYSTEM_PROPERTIES += setupwizard.theme=glif_v4_light
 
 # When the flag RELEASE_ADBD_OPEN_VSOCK_PORT is enabled, open adbd on vsock port 8382 as default.
 ifneq ($(RELEASE_ADBD_OPEN_VSOCK_PORT),)
