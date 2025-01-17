@@ -31,7 +31,7 @@ PRODUCT_PRODUCT_PROPERTIES += \
 # More AOSP packages
 PRODUCT_PACKAGES += \
     initial-package-stopped-states-aosp.xml \
-    messaging \
+    Messaging \
     PhotoTable \
     preinstalled-packages-platform-aosp-product.xml \
     ThemePicker \
