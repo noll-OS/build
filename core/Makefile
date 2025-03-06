@@ -7786,8 +7786,8 @@ deps := \
 sdk_platform_dir_name := $(strip \
   $(if $(filter REL,$(PLATFORM_VERSION_CODENAME)), \
     $(if $(filter $(PLATFORM_SDK_EXTENSION_VERSION),$(PLATFORM_BASE_SDK_EXTENSION_VERSION)), \
-      android-$(PLATFORM_SDK_VERSION), \
-      android-$(PLATFORM_SDK_VERSION)-ext$(PLATFORM_SDK_EXTENSION_VERSION) \
+      android-$(PLATFORM_SDK_VERSION_FULL), \
+      android-$(PLATFORM_SDK_VERSION_FULL)-ext$(PLATFORM_SDK_EXTENSION_VERSION) \
     ), \
     android-$(PLATFORM_VERSION_CODENAME) \
   ) \
