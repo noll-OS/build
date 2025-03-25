@@ -466,7 +466,6 @@ $(call add_json_map, PartitionVarsForSoongMigrationOnlyDoNotUse)
 
   # super image stuff
   $(call add_json_bool, ProductUseDynamicPartitions, $(filter true,$(PRODUCT_USE_DYNAMIC_PARTITIONS)))
-  $(call add_json_bool, ProductRetrofitDynamicPartitions, $(filter true,$(PRODUCT_RETROFIT_DYNAMIC_PARTITIONS)))
   $(call add_json_bool, ProductBuildSuperPartition, $(filter true,$(PRODUCT_BUILD_SUPER_PARTITION)))
   $(call add_json_str, BoardSuperPartitionSize, $(BOARD_SUPER_PARTITION_SIZE))
   $(call add_json_str, BoardSuperPartitionMetadataDevice, $(BOARD_SUPER_PARTITION_METADATA_DEVICE))
