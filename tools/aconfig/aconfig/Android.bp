@@ -13,7 +13,6 @@ rust_defaults {
     ],
     rustlibs: [
         "libaconfig_protos",
-        "libaconfig_storage_file",
         "libanyhow",
         "libclap",
         "libitertools",
@@ -28,6 +27,9 @@ rust_defaults {
 rust_binary_host {
     name: "aconfig",
     defaults: ["aconfig.defaults"],
+    rustlibs: [
+        "libaconfig_storage_file",
+    ],
 }
 
 rust_test_host {
@@ -35,6 +37,7 @@ rust_test_host {
     defaults: ["aconfig.defaults"],
     rustlibs: [
         "libitertools",
+        "libaconfig_storage_file_with_test_utils",
     ],
     test_suites: ["general-tests"],
 }
