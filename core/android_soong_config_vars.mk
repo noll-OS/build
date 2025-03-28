@@ -389,3 +389,9 @@ endif
 ifneq ($(filter StorageManager, $(PRODUCT_PACKAGES)),)
   $(call soong_config_set_bool,ci_tests,uses_storage_manager_tests,true)
 endif
+
+ifneq ($(BUILD_OS),darwin)
+  ifneq ($(TARGET_SKIP_OTATOOLS_PACKAGE),true)
+    $(call soong_config_set_bool,otatools,use_otatools_package,true)
+  endif
+endif
