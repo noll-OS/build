@@ -4,7 +4,7 @@ $(warning Either use 'envsetup.sh; m' or 'build/soong/soong_ui.bash --make-mode'
 $(error done)
 endif
 
-$(info [1/1] initializing legacy Make module parser ...)
+$(info [1/1] initializing Make module parser ...)
 
 # Absolute path of the present working direcotry.
 # This overrides the shell variable $PWD, which does not necessarily points to
@@ -235,7 +235,7 @@ $(shell $(call echo-error,$(LOCAL_MODULE_MAKEFILE),$(LOCAL_MODULE): $(1)))
 $(error done)
 endef
 
-subdir_makefiles_inc := .
+include_makefiles_inc := .
 FULL_BUILD :=
 
 ifneq ($(dont_bother),true)
@@ -266,10 +266,9 @@ endif
 
 subdir_makefiles += $(SOONG_OUT_DIR)/late-$(TARGET_PRODUCT)$(COVERAGE_SUFFIX).mk
 
-subdir_makefiles_total := $(words int $(subdir_makefiles) post finish)
-.KATI_READONLY := subdir_makefiles_total
+include_makefiles_total := $(words int $(subdir_makefiles))
 
-$(foreach mk,$(subdir_makefiles),$(info [$(call inc_and_print,subdir_makefiles_inc)/$(subdir_makefiles_total)] including $(mk) ...)$(eval include $(mk)))
+$(foreach mk,$(subdir_makefiles),$(info [$(call inc_and_print,include_makefiles_inc)/$(include_makefiles_total)] including $(mk) ...)$(eval include $(mk)))
 
 -include device/generic/goldfish/tasks/emu_img_zip.mk
 
@@ -289,11 +288,11 @@ include system/core/rootdir/create_root_structure.mk
 
 endif # dont_bother
 
-ifndef subdir_makefiles_total
-subdir_makefiles_total := $(words init post finish)
+ifndef include_makefiles_total
+include_makefiles_total := $(words init post finish)
 endif
 
-$(info [$(call inc_and_print,subdir_makefiles_inc)/$(subdir_makefiles_total)] finishing legacy Make module parsing ...)
+$(info [$(include_makefiles_total)/$(include_makefiles_total)] finishing Make module rules ...)
 
 # -------------------------------------------------------------------
 # All module makefiles have been included at this point.
@@ -514,6 +513,8 @@ endef
 define add-required-host-so-deps
 $(1): $(2)
 endef
+
+$(info [$(include_makefiles_total)/$(include_makefiles_total)] finishing Make module rules: Adding module dependencies)
 
 # Sets up dependencies such that whenever a host module is installed,
 # any other host modules listed in $(ALL_MODULES.$(m).REQUIRED_FROM_HOST) will also be installed
@@ -1189,6 +1190,8 @@ endif
 modules_to_install := $(sort $(ALL_DEFAULT_INSTALLED_MODULES))
 ALL_DEFAULT_INSTALLED_MODULES :=
 
+$(info [$(include_makefiles_total)/$(include_makefiles_total)] finishing Make packaging rules: Adding phony targets)
+
 ifdef FULL_BUILD
 #
 # Used by the cleanup logic in soong_ui to remove files that should no longer
@@ -1211,6 +1214,7 @@ $(file >$(HOST_OUT)/.installable_test_files,$(sort \
 
 test_files :=
 endif
+
 
 # Some notice deps refer to module names without prefix or arch suffix where
 # only the variants with them get built.
@@ -1714,6 +1718,8 @@ ifneq ($(UNSAFE_DISABLE_APEX_ALLOWED_DEPS_CHECK),true)
   droidcore: ${APEX_ALLOWED_DEPS_CHECK}
 endif
 
+$(info [$(include_makefiles_total)/$(include_makefiles_total)] finishing Make packaging rules: Checking licensing and SBOM)
+
 # Create a license metadata rule per module. Could happen in base_rules.mk or
 # notice_files.mk; except, it has to happen after fix-notice-deps to avoid
 # missing dependency errors.
@@ -1947,4 +1953,4 @@ endif
 
 $(call dist-write-file,$(KATI_PACKAGE_MK_DIR)/dist.mk)
 
-$(info [$(call inc_and_print,subdir_makefiles_inc)/$(subdir_makefiles_total)] writing legacy Make module rules ...)
+$(info [$(include_makefiles_total)/$(include_makefiles_total)] writing make module actions ...)
