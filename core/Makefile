@@ -6724,10 +6724,6 @@ ifdef OSRELEASED_DIRECTORY
 	$(hide) cp $(TARGET_OUT_ETC)/$(OSRELEASED_DIRECTORY)/system_version $(zip_root)/META/system_version.txt
 endif
 endif
-ifeq ($(BREAKPAD_GENERATE_SYMBOLS),true)
-	@# If breakpad symbols have been generated, add them to the zip.
-	$(hide) cp -R $(TARGET_OUT_BREAKPAD) $(zip_root)/BREAKPAD
-endif
 ifdef BOARD_PREBUILT_VENDOR_BOOTIMAGE
 	$(hide) mkdir -p $(zip_root)/IMAGES
 	$(hide) cp $(INSTALLED_VENDOR_BOOTIMAGE_TARGET) $(zip_root)/IMAGES/
@@ -7741,8 +7737,7 @@ deps := \
   $(INSTALLED_SDK_BUILD_PROP_TARGET) \
 	$(ATREE_FILES) \
 	$(sdk_atree_files) \
-	$(HOST_OUT_EXECUTABLES)/atree \
-	$(HOST_OUT_EXECUTABLES)/line_endings
+	$(HOST_OUT_EXECUTABLES)/atree
 
 # The name of the subdir within the platforms dir of the sdk. One of:
 # - android-<SDK_INT> (stable base dessert SDKs)
