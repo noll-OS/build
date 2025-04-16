@@ -543,23 +543,12 @@ else ifeq (,$(PRODUCT_COMPRESSED_APEX))
   PRODUCT_COMPRESSED_APEX := true
 endif
 
-###########################################
-# Set the default payload type for APEXes
-#
-_default_payload_fs_type := ext4
-ifeq (true,$(RELEASE_APEX_USE_EROFS_PREINSTALLED))
-  _default_payload_fs_type := erofs
-endif
-
-# Default APEX payload type can be forcibly set with
-# OVERRIDE_PRODUCT_DEFAULT_APEX_PAYLOAD_TYPE.
 ifdef OVERRIDE_PRODUCT_DEFAULT_APEX_PAYLOAD_TYPE
   PRODUCT_DEFAULT_APEX_PAYLOAD_TYPE := $(OVERRIDE_PRODUCT_DEFAULT_APEX_PAYLOAD_TYPE)
 else ifeq ($(PRODUCT_DEFAULT_APEX_PAYLOAD_TYPE),)
-  PRODUCT_DEFAULT_APEX_PAYLOAD_TYPE := $(_default_payload_fs_type)
+  # Use ext4 as a default payload fs type
+  PRODUCT_DEFAULT_APEX_PAYLOAD_TYPE := ext4
 endif
-_default_payload_fs_type :=
-
 ifeq ($(filter ext4 erofs,$(PRODUCT_DEFAULT_APEX_PAYLOAD_TYPE)),)
   $(error PRODUCT_DEFAULT_APEX_PAYLOAD_TYPE should be either erofs or ext4,\
     not $(PRODUCT_DEFAULT_APEX_PAYLOAD_TYPE).)
