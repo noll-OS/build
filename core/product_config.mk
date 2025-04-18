@@ -550,6 +550,10 @@ ifdef OVERRIDE_PRODUCT_COMPRESSED_APEX
 else ifeq (,$(PRODUCT_COMPRESSED_APEX))
   PRODUCT_COMPRESSED_APEX := $(_default_compressed_apex)
 endif
+ifeq (,$(filter true false,$(PRODUCT_COMPRESSED_APEX)))
+  $(error PRODUCT_COMPRESSED_APEX should be either true or false)
+endif
+PRODUCT_SYSTEM_PROPERTIES += apexd.config.compressed_apex=$(PRODUCT_COMPRESSED_APEX)
 
 ###########################################
 # Set the default payload type for APEXes
