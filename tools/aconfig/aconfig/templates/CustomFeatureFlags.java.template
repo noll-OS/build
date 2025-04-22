@@ -43,16 +43,20 @@ public class CustomFeatureFlags implements FeatureFlags \{
 {{ endfor }}
 
 {{ -if not library_exported }}
-    public boolean isFlagReadOnlyOptimized(String flagName) \{
-        if (mReadOnlyFlagsSet.contains(flagName) &&
+    public static boolean isFlagReadOnlyOptimized(String flagName) \{
+        if (READ_ONLY_FLAGS_SET.contains(flagName) &&
             isOptimizationEnabled()) \{
                 return true;
         }
         return false;
     }
 
+    public static boolean isFlagReadOnly(String flagName) \{
+        return READ_ONLY_FLAGS_SET.contains(flagName);
+    }
+
     @com.android.aconfig.annotations.AssumeTrueForR8
-    private boolean isOptimizationEnabled() \{
+    private static boolean isOptimizationEnabled() \{
         return false;
     }
 {{ -endif }}
@@ -70,7 +74,7 @@ public class CustomFeatureFlags implements FeatureFlags \{
         );
     }
 
-    private Set<String> mReadOnlyFlagsSet = new HashSet<>(
+    private static final Set<String> READ_ONLY_FLAGS_SET = new HashSet<>(
         Arrays.asList(
             {{ -for item in flag_elements }}
             {{ -if not item.is_read_write }}
@@ -82,7 +86,7 @@ public class CustomFeatureFlags implements FeatureFlags \{
     );
 
 {{ -if library_exported }}
-    private Map<String, Boolean> mFinalizedFlags = new HashMap<>(
+    private static final Map<String, Boolean> FINALIZED_FLAGS = new HashMap<>(
         Map.ofEntries(
             {{ -for item in flag_elements }}
             {{ -if item.finalized_sdk_present }}
@@ -93,11 +97,11 @@ public class CustomFeatureFlags implements FeatureFlags \{
         )
     );
 
-    public boolean isFlagFinalized(String flagName) \{
-        if (!mFinalizedFlags.containsKey(flagName)) \{
+    public static boolean isFlagFinalized(String flagName) \{
+        if (!FINALIZED_FLAGS.containsKey(flagName)) \{
             return false;
         }
-        return mFinalizedFlags.get(flagName);
+        return FINALIZED_FLAGS.get(flagName);
     }
 {{ -endif }}
 }
