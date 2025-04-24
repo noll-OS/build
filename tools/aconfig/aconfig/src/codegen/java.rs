@@ -482,20 +482,16 @@ mod tests {
                 FeatureFlags::enabledRw);
         }
 
-        public static boolean isFlagReadOnlyOptimized(String flagName) {
-            if (READ_ONLY_FLAGS_SET.contains(flagName) &&
+        public boolean isFlagReadOnlyOptimized(String flagName) {
+            if (mReadOnlyFlagsSet.contains(flagName) &&
                 isOptimizationEnabled()) {
                     return true;
             }
             return false;
         }
 
-        public static boolean isFlagReadOnly(String flagName) {
-            return READ_ONLY_FLAGS_SET.contains(flagName);
-        }
-
         @com.android.aconfig.annotations.AssumeTrueForR8
-        private static boolean isOptimizationEnabled() {
+        private boolean isOptimizationEnabled() {
             return false;
         }
 
@@ -517,7 +513,7 @@ mod tests {
             );
         }
 
-        private static final Set<String> READ_ONLY_FLAGS_SET = new HashSet<>(
+        private Set<String> mReadOnlyFlagsSet = new HashSet<>(
             Arrays.asList(
                 Flags.FLAG_DISABLED_RO,
                 Flags.FLAG_ENABLED_FIXED_RO,
@@ -897,23 +893,23 @@ mod tests {
                 );
             }
 
-            private static final Set<String> READ_ONLY_FLAGS_SET = new HashSet<>(
+            private Set<String> mReadOnlyFlagsSet = new HashSet<>(
                 Arrays.asList(
                     ""
                 )
             );
 
-            private static final Map<String, Boolean> FINALIZED_FLAGS = new HashMap<>(
+            private Map<String, Boolean> mFinalizedFlags = new HashMap<>(
                 Map.ofEntries(
                     Map.entry("", false)
                 )
             );
 
-            public static boolean isFlagFinalized(String flagName) {
-                if (!FINALIZED_FLAGS.containsKey(flagName)) {
+            public boolean isFlagFinalized(String flagName) {
+                if (!mFinalizedFlags.containsKey(flagName)) {
                     return false;
                 }
-                return FINALIZED_FLAGS.get(flagName);
+                return mFinalizedFlags.get(flagName);
             }
         }
     "#;
@@ -1118,24 +1114,24 @@ mod tests {
                 );
             }
 
-            private static final Set<String> READ_ONLY_FLAGS_SET = new HashSet<>(
+            private Set<String> mReadOnlyFlagsSet = new HashSet<>(
                 Arrays.asList(
                     ""
                 )
             );
 
-            private static final Map<String, Boolean> FINALIZED_FLAGS = new HashMap<>(
+            private Map<String, Boolean> mFinalizedFlags = new HashMap<>(
                 Map.ofEntries(
                     Map.entry(Flags.FLAG_DISABLED_RW_EXPORTED, Build.VERSION.SDK_INT >= 36 ? true : false),
                     Map.entry("", false)
                 )
             );
 
-            public static boolean isFlagFinalized(String flagName) {
-                if (!FINALIZED_FLAGS.containsKey(flagName)) {
+            public boolean isFlagFinalized(String flagName) {
+                if (!mFinalizedFlags.containsKey(flagName)) {
                     return false;
                 }
-                return FINALIZED_FLAGS.get(flagName);
+                return mFinalizedFlags.get(flagName);
             }
         }
     "#;
@@ -1559,20 +1555,16 @@ mod tests {
                     FeatureFlags::enabledRw);
             }
 
-            public static boolean isFlagReadOnlyOptimized(String flagName) {
-                if (READ_ONLY_FLAGS_SET.contains(flagName) &&
+            public boolean isFlagReadOnlyOptimized(String flagName) {
+                if (mReadOnlyFlagsSet.contains(flagName) &&
                     isOptimizationEnabled()) {
                         return true;
                 }
                 return false;
             }
 
-            public static boolean isFlagReadOnly(String flagName) {
-                return READ_ONLY_FLAGS_SET.contains(flagName);
-            }
-
             @com.android.aconfig.annotations.AssumeTrueForR8
-            private static boolean isOptimizationEnabled() {
+            private boolean isOptimizationEnabled() {
                 return false;
             }
 
@@ -1591,7 +1583,7 @@ mod tests {
                 );
             }
 
-            private static final Set<String> READ_ONLY_FLAGS_SET = new HashSet<>(
+            private Set<String> mReadOnlyFlagsSet = new HashSet<>(
                 Arrays.asList(
                     Flags.FLAG_DISABLED_RO,
                     Flags.FLAG_DISABLED_RW,
