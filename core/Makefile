@@ -7268,31 +7268,6 @@ endif
 
 _symbols_zip_modules_symbols_files :=
 _symbols_zip_modules_mapping_files :=
-# -----------------------------------------------------------------
-# A zip of the coverage directory.
-#
-name := gcov-report-files-all
-ifeq ($(TARGET_BUILD_TYPE),debug)
-name := $(name)_debug
-endif
-COVERAGE_ZIP := $(PRODUCT_OUT)/$(name).zip
-ifeq (,$(TARGET_BUILD_UNBUNDLED))
-$(COVERAGE_ZIP): $(INTERNAL_ALLIMAGES_FILES)
-endif
-$(COVERAGE_ZIP): PRIVATE_LIST_FILE := $(call intermediates-dir-for,PACKAGING,coverage)/filelist
-$(COVERAGE_ZIP): $(SOONG_ZIP)
-	@echo "Package coverage: $@"
-	$(hide) rm -rf $@ $(PRIVATE_LIST_FILE)
-	$(hide) mkdir -p $(dir $@) $(TARGET_OUT_COVERAGE) $(dir $(PRIVATE_LIST_FILE))
-	$(hide) find $(TARGET_OUT_COVERAGE) | sort >$(PRIVATE_LIST_FILE)
-	$(hide) $(SOONG_ZIP) -d -o $@ -C $(TARGET_OUT_COVERAGE) -l $(PRIVATE_LIST_FILE)
-
-$(call declare-1p-container,$(COVERAGE_ZIP),)
-ifeq (,$(TARGET_BUILD_UNBUNDLED))
-$(call declare-container-license-deps,$(COVERAGE_ZIP),$(INTERNAL_ALLIMAGE_FILES),$(PRODUCT_OUT)/:/)
-endif
-
-SYSTEM_NOTICE_DEPS += $(COVERAGE_ZIP)
 
 ifeq (true,$(EMMA_INSTRUMENT))
 #------------------------------------------------------------------
