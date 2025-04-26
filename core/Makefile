@@ -3508,7 +3508,7 @@ $(check-selinux-treble-labeling.timestamp): $(HOST_OUT_EXECUTABLES)/treble_label
 check-selinux-treble-labeling: $(check-selinux-treble-labeling.timestamp)
 
 ifeq ($(PRODUCT_ENFORCE_SELINUX_TREBLE_LABELING),true)
-droidcore: $(check-selinux-treble-labeling)
+droidcore: check-selinux-treble-labeling
 endif  # PRODUCT_ENFORCE_SELINUX_TREBLE_LABELING
 
 platform-preinstalled-apps-patterns :=
@@ -5460,7 +5460,7 @@ $(BUILT_KERNEL_VERSION_FILE): $(EXTRACT_KERNEL) $(firstword $(INSTALLED_KERNEL_T
 	  --output-release` ;\
   if [ "$$KERNEL_RELEASE" != '$(BOARD_KERNEL_VERSION)' ]; then \
     echo "Specified kernel version '$(BOARD_KERNEL_VERSION)' does not match actual kernel version '$$KERNEL_RELEASE' " ; exit 1; fi;
-	echo '$(BOARD_KERNEL_VERSION)' > $@
+	echo -n '$(BOARD_KERNEL_VERSION)' > $@
 
 $(call declare-license-metadata,$(BUILT_KERNEL_VERSION_FILE),SPDX-license-identifier-GPL-2.0-only,restricted,$(BUILD_SYSTEM)/LINUX_KERNEL_COPYING,"Kernel",kernel)
 
@@ -7268,47 +7268,6 @@ endif
 
 _symbols_zip_modules_symbols_files :=
 _symbols_zip_modules_mapping_files :=
-# -----------------------------------------------------------------
-# A zip of the coverage directory.
-#
-name := gcov-report-files-all
-ifeq ($(TARGET_BUILD_TYPE),debug)
-name := $(name)_debug
-endif
-COVERAGE_ZIP := $(PRODUCT_OUT)/$(name).zip
-ifeq (,$(TARGET_BUILD_UNBUNDLED))
-$(COVERAGE_ZIP): $(INTERNAL_ALLIMAGES_FILES)
-endif
-$(COVERAGE_ZIP): PRIVATE_LIST_FILE := $(call intermediates-dir-for,PACKAGING,coverage)/filelist
-$(COVERAGE_ZIP): $(SOONG_ZIP)
-	@echo "Package coverage: $@"
-	$(hide) rm -rf $@ $(PRIVATE_LIST_FILE)
-	$(hide) mkdir -p $(dir $@) $(TARGET_OUT_COVERAGE) $(dir $(PRIVATE_LIST_FILE))
-	$(hide) find $(TARGET_OUT_COVERAGE) | sort >$(PRIVATE_LIST_FILE)
-	$(hide) $(SOONG_ZIP) -d -o $@ -C $(TARGET_OUT_COVERAGE) -l $(PRIVATE_LIST_FILE)
-
-$(call declare-1p-container,$(COVERAGE_ZIP),)
-ifeq (,$(TARGET_BUILD_UNBUNDLED))
-$(call declare-container-license-deps,$(COVERAGE_ZIP),$(INTERNAL_ALLIMAGE_FILES),$(PRODUCT_OUT)/:/)
-endif
-
-SYSTEM_NOTICE_DEPS += $(COVERAGE_ZIP)
-
-#------------------------------------------------------------------
-# Export the LLVM profile data tool and dependencies for Clang coverage processing
-#
-ifeq (true,$(CLANG_COVERAGE))
-  LLVM_PROFDATA := $(LLVM_PREBUILTS_BASE)/linux-x86/$(LLVM_PREBUILTS_VERSION)/bin/llvm-profdata
-  LLVM_COV := $(LLVM_PREBUILTS_BASE)/linux-x86/$(LLVM_PREBUILTS_VERSION)/bin/llvm-cov
-  LIBCXX := $(LLVM_PREBUILTS_BASE)/linux-x86/$(LLVM_PREBUILTS_VERSION)/lib/x86_64-unknown-linux-gnu/libc++.so
-  # Use llvm-profdata.zip for backwards compatibility with tradefed code.
-  LLVM_COVERAGE_TOOLS_ZIP := $(PRODUCT_OUT)/llvm-profdata.zip
-
-  $(LLVM_COVERAGE_TOOLS_ZIP): $(SOONG_ZIP)
-	$(hide) $(SOONG_ZIP) -d -o $@ -C $(LLVM_PREBUILTS_BASE)/linux-x86/$(LLVM_PREBUILTS_VERSION) -f $(LLVM_PROFDATA) -f $(LIBCXX) -f $(LLVM_COV)
-
-  $(call dist-for-goals,droidcore-unbundled apps_only,$(LLVM_COVERAGE_TOOLS_ZIP))
-endif
 
 ifeq (true,$(EMMA_INSTRUMENT))
 #------------------------------------------------------------------
