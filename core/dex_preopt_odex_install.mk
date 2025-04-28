@@ -242,18 +242,21 @@ endif
 my_enforced_uses_libraries :=
 ifeq (true,$(LOCAL_ENFORCE_USES_LIBRARIES))
   my_verify_script := build/soong/scripts/manifest_check.py
-  my_uses_libs_args := $(patsubst %,--uses-library %,$(LOCAL_USES_LIBRARIES))
+  my_uses_libs_args := $(patsubst %,--uses-library %, \
+    $(filter-out $(my_all_boot_jars),$(LOCAL_USES_LIBRARIES)))
   my_optional_uses_libs_args := $(patsubst %,--optional-uses-library %, \
-    $(LOCAL_OPTIONAL_USES_LIBRARIES))
+    $(filter-out $(my_all_boot_jars),$(LOCAL_OPTIONAL_USES_LIBRARIES)))
   my_relax_check_arg := $(if $(filter true,$(RELAX_USES_LIBRARY_CHECK)), \
     --enforce-uses-libraries-relax,)
   my_dexpreopt_config_args := $(patsubst %,--dexpreopt-config %,$(my_dexpreopt_dep_configs))
+  my_bootclasspath_libs_args := $(patsubst %,--bootclasspath-libs %,$(my_all_boot_jars))
 
   my_enforced_uses_libraries := $(intermediates)/enforce_uses_libraries.status
   $(my_enforced_uses_libraries): PRIVATE_USES_LIBRARIES := $(my_uses_libs_args)
   $(my_enforced_uses_libraries): PRIVATE_OPTIONAL_USES_LIBRARIES := $(my_optional_uses_libs_args)
   $(my_enforced_uses_libraries): PRIVATE_DEXPREOPT_CONFIGS := $(my_dexpreopt_config_args)
   $(my_enforced_uses_libraries): PRIVATE_RELAX_CHECK := $(my_relax_check_arg)
+  $(my_enforced_uses_libraries): PRIVATE_BOOT_CLASSPATH_LIBS := $(my_bootclasspath_libs_args)
   $(my_enforced_uses_libraries): $(AAPT2)
   $(my_enforced_uses_libraries): $(my_verify_script)
   $(my_enforced_uses_libraries): $(my_dexpreopt_dep_configs)
@@ -268,6 +271,7 @@ ifeq (true,$(LOCAL_ENFORCE_USES_LIBRARIES))
 	  $(PRIVATE_OPTIONAL_USES_LIBRARIES) \
 	  $(PRIVATE_DEXPREOPT_CONFIGS) \
 	  $(PRIVATE_RELAX_CHECK) \
+	  $(PRIVATE_BOOT_CLASSPATH_LIBS) \
 	  $<
   $(LOCAL_BUILT_MODULE) : $(my_enforced_uses_libraries)
 endif
