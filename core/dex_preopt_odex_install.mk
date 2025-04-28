@@ -138,9 +138,17 @@ else
   my_dexpreopt_libs_compat :=
 endif
 
-my_dexpreopt_libs := \
-  $(LOCAL_USES_LIBRARIES) \
-  $(my_filtered_optional_uses_libraries)
+# Bootclasspath jars are accessible by all apps, so they don't have to and
+# should not be in the CLC.
+# For framework.jar, the name in `PRODUCT_BOOT_JARS` is `framework-minus-apex`,
+# so we need to use `FRAMEWORK_LIBRARIES`, which contains `framework`, to be
+# used for filtering.
+my_all_boot_jars := \
+  $(foreach jar,$(PRODUCT_BOOT_JARS) $(PRODUCT_APEX_BOOT_JARS),$(call word-colon,2,$(jar))) \
+  $(FRAMEWORK_LIBRARIES)
+
+my_dexpreopt_libs := $(filter-out $(my_all_boot_jars), \
+  $(LOCAL_USES_LIBRARIES) $(my_filtered_optional_uses_libraries))
 
 # The order needs to be deterministic.
 my_dexpreopt_libs_all := $(sort $(my_dexpreopt_libs) $(my_dexpreopt_libs_compat))
@@ -152,7 +160,7 @@ my_dexpreopt_libs_all := $(sort $(my_dexpreopt_libs) $(my_dexpreopt_libs_compat)
 # this dexpreopt.config is generated. So it's necessary to add file-level
 # dependencies between dexpreopt.config files.
 my_dexpreopt_dep_configs := $(foreach lib, \
-  $(filter-out $(my_dexpreopt_libs_compat) $(FRAMEWORK_LIBRARIES),$(LOCAL_USES_LIBRARIES) $(my_filtered_optional_uses_libraries)), \
+  $(filter-out $(my_dexpreopt_libs_compat),$(my_dexpreopt_libs)), \
   $(call intermediates-dir-for,JAVA_LIBRARIES,$(lib),,)/dexpreopt.config)
 
 # 1: SDK version
