@@ -26,11 +26,7 @@ rust_defaults {
     cfgs: select(release_flag("RELEASE_ACONFIG_FINGERPRINT_RUST"), {
         true: ["enable_fingerprint_rust"],
         default: [],
-    }) +
-        select(release_flag("RELEASE_JARJAR_FLAGS_IN_FRAMEWORK"), {
-            true: ["enable_jarjar_flags_in_framwork"],
-            default: [],
-        }),
+    }),
 }
 
 rust_binary_host {
