@@ -2328,9 +2328,9 @@ $(if $(BOARD_AVB_ENABLE), \
   $(if $(filter $(2),system_other), \
     $(hide) echo "avb_system_other_hashtree_enable=$(BOARD_AVB_ENABLE)" >> $(1)$(newline) \
     $(hide) echo "avb_system_other_add_hashtree_footer_args=$(BOARD_AVB_SYSTEM_OTHER_ADD_HASHTREE_FOOTER_ARGS)" >> $(1)$(newline) \
-    $(if $(BOARD_AVB_SYSTEM_OTHER_KEY_PATH),\
-      $(hide) echo "avb_system_other_key_path=$(BOARD_AVB_SYSTEM_OTHER_KEY_PATH)" >> $(1)$(newline) \
-      $(hide) echo "avb_system_other_algorithm=$(BOARD_AVB_SYSTEM_OTHER_ALGORITHM)" >> $(1)$(newline))) \
+    $(if $(BOARD_AVB_SYSTEM_KEY_PATH),\
+      $(hide) echo "avb_system_other_key_path=$(BOARD_AVB_SYSTEM_KEY_PATH)" >> $(1)$(newline) \
+      $(hide) echo "avb_system_other_algorithm=$(BOARD_AVB_SYSTEM_ALGORITHM)" >> $(1)$(newline))) \
   $(if $(filter $(2),vendor), \
     $(hide) echo "avb_vendor_hashtree_enable=$(BOARD_AVB_ENABLE)" >> $(1)$(newline) \
     $(hide) echo "avb_vendor_add_hashtree_footer_args=$(BOARD_AVB_VENDOR_ADD_HASHTREE_FOOTER_ARGS)" >> $(1)$(newline) \
