@@ -999,6 +999,14 @@ ifneq (,$(LOCAL_SOONG_INSTALLED_MODULE))
       $(my_installed_test_data) \
       $(my_vintf_installed))
 
+  ifneq (,$(LOCAL_IS_HOST_MODULE))
+    ALL_MODULES.$(my_register_name).HOST_INSTALLED := \
+    $(strip $(ALL_MODULES.$(my_register_name).HOST_INSTALLED) \
+      $(foreach f, $(LOCAL_SOONG_INSTALL_PAIRS),\
+        $(word 2,$(subst :,$(space),$(f)))) \
+      $(LOCAL_SOONG_INSTALL_SYMLINKS))
+  endif
+
   ALL_MODULES.$(my_register_name).INSTALLED_SYMLINKS := $(LOCAL_SOONG_INSTALL_SYMLINKS)
 
   # Store the list of colon-separated pairs of the built and installed locations
