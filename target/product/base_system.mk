@@ -387,6 +387,11 @@ ifneq ($(RELEASE_MOVE_VCN_TO_MAINLINE),true)
         framework-connectivity-b
 endif
 
+ifeq ($(RELEASE_TELEPHONY_MODULE),true)
+    PRODUCT_PACKAGES += \
+       com.android.telephony
+endif
+
 ifneq (,$(RELEASE_RANGING_STACK))
     PRODUCT_PACKAGES += \
         com.android.ranging
@@ -553,6 +558,17 @@ PRODUCT_PACKAGES_DEBUG := \
     unwind_info \
     unwind_reg_info \
     unwind_symbols \
+
+# Enable logcat persistence based on the release config flag.
+ifeq ($(RELEASE_ENABLE_LOGCAT_PERSISTENCE),true)
+  PRODUCT_ENABLE_LOGCAT_PERSISTENCE := $(RELEASE_ENABLE_LOGCAT_PERSISTENCE)
+endif
+
+# Include logpersist build target if logcat persistence is enabled.
+ifeq ($(PRODUCT_ENABLE_LOGCAT_PERSISTENCE),true)
+    PRODUCT_PACKAGES += \
+        logpersist.start
+endif
 
 # The set of packages whose code can be loaded by the system server.
 PRODUCT_SYSTEM_SERVER_APPS += \

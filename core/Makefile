@@ -1233,6 +1233,12 @@ endif
 
 INTERNAL_PREBUILT_BOOTIMAGE :=
 
+# Split lunches (especially the system side lunch) can have init_boot enabled without the kernel,
+# handle that case and continue to pass the OS-version/patch-level values into the init_boot.img.
+INTERNAL_MKBOOTIMG_VERSION_ARGS := \
+  --os_version $(PLATFORM_VERSION_LAST_STABLE) \
+  --os_patch_level $(PLATFORM_SECURITY_PATCH)
+
 my_installed_prebuilt_gki_apex := $(strip $(foreach package,$(PRODUCT_PACKAGES),$(if $(ALL_MODULES.$(package).EXTRACTED_BOOT_IMAGE),$(package))))
 ifdef my_installed_prebuilt_gki_apex
   ifneq (1,$(words $(my_installed_prebuilt_gki_apex))) # len(my_installed_prebuilt_gki_apex) > 1
@@ -1329,10 +1335,6 @@ else ifndef BUILDING_VENDOR_BOOT_IMAGE # && BOARD_USES_GENERIC_KERNEL_IMAGE != t
     INTERNAL_BOOTIMAGE_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
   endif
 endif # BUILDING_VENDOR_BOOT_IMAGE == "" && BOARD_USES_GENERIC_KERNEL_IMAGE != true
-
-INTERNAL_MKBOOTIMG_VERSION_ARGS := \
-  --os_version $(PLATFORM_VERSION_LAST_STABLE) \
-  --os_patch_level $(PLATFORM_SECURITY_PATCH)
 
 # Define these only if we are building boot
 ifdef BUILDING_BOOT_IMAGE
@@ -1543,8 +1545,14 @@ $(INSTALLED_INIT_BOOT_IMAGE_TARGET): $(MKBOOTIMG) $(INSTALLED_RAMDISK_TARGET)
 
 INTERNAL_INIT_BOOT_IMAGE_ARGS := --ramdisk $(INSTALLED_RAMDISK_TARGET)
 
-ifdef BOARD_KERNEL_PAGESIZE
-  INTERNAL_INIT_BOOT_IMAGE_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
+ifdef BOARD_INIT_BOOT_IMAGE_PAGESIZE
+	INTERNAL_INIT_BOOT_IMAGE_PAGESIZE := $(BOARD_INIT_BOOT_IMAGE_PAGESIZE)
+else ifdef BOARD_KERNEL_PAGESIZE
+	INTERNAL_INIT_BOOT_IMAGE_PAGESIZE := $(BOARD_KERNEL_PAGESIZE)
+endif
+
+ifdef INTERNAL_INIT_BOOT_IMAGE_PAGESIZE
+  INTERNAL_INIT_BOOT_IMAGE_ARGS += --pagesize $(INTERNAL_INIT_BOOT_IMAGE_PAGESIZE)
 endif
 
 ifeq ($(BOARD_AVB_ENABLE),true)
@@ -2320,9 +2328,9 @@ $(if $(BOARD_AVB_ENABLE), \
   $(if $(filter $(2),system_other), \
     $(hide) echo "avb_system_other_hashtree_enable=$(BOARD_AVB_ENABLE)" >> $(1)$(newline) \
     $(hide) echo "avb_system_other_add_hashtree_footer_args=$(BOARD_AVB_SYSTEM_OTHER_ADD_HASHTREE_FOOTER_ARGS)" >> $(1)$(newline) \
-    $(if $(BOARD_AVB_SYSTEM_OTHER_KEY_PATH),\
-      $(hide) echo "avb_system_other_key_path=$(BOARD_AVB_SYSTEM_OTHER_KEY_PATH)" >> $(1)$(newline) \
-      $(hide) echo "avb_system_other_algorithm=$(BOARD_AVB_SYSTEM_OTHER_ALGORITHM)" >> $(1)$(newline))) \
+    $(if $(BOARD_AVB_SYSTEM_KEY_PATH),\
+      $(hide) echo "avb_system_other_key_path=$(BOARD_AVB_SYSTEM_KEY_PATH)" >> $(1)$(newline) \
+      $(hide) echo "avb_system_other_algorithm=$(BOARD_AVB_SYSTEM_ALGORITHM)" >> $(1)$(newline))) \
   $(if $(filter $(2),vendor), \
     $(hide) echo "avb_vendor_hashtree_enable=$(BOARD_AVB_ENABLE)" >> $(1)$(newline) \
     $(hide) echo "avb_vendor_add_hashtree_footer_args=$(BOARD_AVB_VENDOR_ADD_HASHTREE_FOOTER_ARGS)" >> $(1)$(newline) \
@@ -7227,6 +7235,9 @@ $(foreach suite,$(ALL_COMPATIBILITY_SUITES),$(eval $(call create-suite-symbols-m
 # a stack trace frame.
 #
 
+# The symbols.zip for unbundled builds is built with soong
+ifeq (,$(TARGET_BUILD_UNBUNDLED))
+
 name := $(TARGET_PRODUCT)
 ifeq ($(TARGET_BUILD_TYPE),debug)
   name := $(name)_debug
@@ -7238,12 +7249,7 @@ SYMBOLS_ZIP := $(PRODUCT_OUT)/$(name)-symbols.zip
 SYMBOLS_MAPPING := $(PRODUCT_OUT)/$(name)-symbols-mapping.textproto
 .KATI_READONLY := SYMBOLS_ZIP SYMBOLS_MAPPING
 
-ifeq (,$(TARGET_BUILD_UNBUNDLED))
-  _symbols_zip_modules := $(call product-installed-modules,$(INTERNAL_PRODUCT))
-  $(SYMBOLS_ZIP): $(updater_dep)
-else
-  _symbols_zip_modules := $(unbundled_build_modules)
-endif
+_symbols_zip_modules := $(call product-installed-modules,$(INTERNAL_PRODUCT))
 
 _symbols_zip_modules_symbols_files := $(foreach m,$(_symbols_zip_modules),$(ALL_MODULES.$(m).SYMBOLIC_OUTPUT_PATH))
 _symbols_zip_modules_mapping_files := $(foreach m,$(_symbols_zip_modules),$(ALL_MODULES.$(m).ELF_SYMBOL_MAPPING_PATH))
@@ -7262,12 +7268,12 @@ $(SYMBOLS_ZIP): $(SOONG_ZIP) $(SYMBOLS_MAP) $(_symbols_zip_modules_symbols_files
 $(SYMBOLS_ZIP): .KATI_IMPLICIT_OUTPUTS := $(SYMBOLS_MAPPING)
 
 $(call declare-1p-container,$(SYMBOLS_ZIP),)
-ifeq (,$(TARGET_BUILD_UNBUNDLED))
-$(call declare-container-license-deps,$(SYMBOLS_ZIP),$(PRIVATE_SYMBOLS_MODULES_FILES) $(updater_dep),$(PRODUCT_OUT)/:/)
-endif
+$(call declare-container-license-deps,$(SYMBOLS_ZIP),$(PRIVATE_SYMBOLS_MODULES_FILES),$(PRODUCT_OUT)/:/)
 
 _symbols_zip_modules_symbols_files :=
 _symbols_zip_modules_mapping_files :=
+
+endif # ifeq (,$(TARGET_BUILD_UNBUNDLED))
 
 ifeq (true,$(EMMA_INSTRUMENT))
 #------------------------------------------------------------------
@@ -7932,19 +7938,6 @@ include $(TOPDIR)development/build/tools/sdk_repo.mk
 endif
 
 # -----------------------------------------------------------------
-# Soong generates the list of all shared libraries that are depended on by fuzz
-# targets. It saves this list as a source:destination pair to
-# FUZZ_TARGET_SHARED_DEPS_INSTALL_PAIRS, where the source is the path to the
-# build of the unstripped shared library, and the destination is the
-# /data/fuzz/$ARCH/lib (for device) or /fuzz/$ARCH/lib (for host) directory
-# where fuzz target shared libraries are to be "reinstalled". The
-# copy-many-files below generates the rules to copy the unstripped shared
-# libraries to the device or host "reinstallation" directory. These rules are
-# depended on by each module in soong_cc_prebuilt.mk, where the module will have
-# a dependency on each shared library that it needs to be "reinstalled".
-FUZZ_SHARED_DEPS := $(call copy-many-files,$(strip $(FUZZ_TARGET_SHARED_DEPS_INSTALL_PAIRS)))
-
-# -----------------------------------------------------------------
 # The rule to build all fuzz targets for C++ and Rust, and package them.
 # Note: The packages are created in Soong, and in a perfect world,
 # we'd be able to create the phony rule there. But, if we want to
@@ -7961,10 +7954,6 @@ $(call dist-for-goals,haiku,$(PRODUCT_OUT)/module-info.json)
 .PHONY: haiku-java
 haiku-java: $(SOONG_JAVA_FUZZ_PACKAGING_ARCH_MODULES) $(ALL_JAVA_FUZZ_TARGETS)
 $(call dist-for-goals,haiku-java,$(SOONG_JAVA_FUZZ_PACKAGING_ARCH_MODULES))
-.PHONY: haiku-rust
-haiku-rust: $(SOONG_RUST_FUZZ_PACKAGING_ARCH_MODULES) $(ALL_RUST_FUZZ_TARGETS)
-$(call dist-for-goals,haiku-rust,$(SOONG_RUST_FUZZ_PACKAGING_ARCH_MODULES))
-$(call dist-for-goals,haiku-rust,$(PRODUCT_OUT)/module-info.json)
 .PHONY: haiku-presubmit
 haiku-presubmit: $(SOONG_PRESUBMIT_FUZZ_PACKAGING_ARCH_MODULES) $(ALL_PRESUBMIT_FUZZ_TARGETS)
 $(call dist-for-goals,haiku-presubmit,$(SOONG_PRESUBMIT_FUZZ_PACKAGING_ARCH_MODULES))
