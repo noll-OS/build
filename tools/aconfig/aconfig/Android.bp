@@ -45,6 +45,9 @@ rust_test_host {
         "libitertools",
     ],
     test_suites: ["general-tests"],
+    data: [
+        "tests/mainline_beta_namespaces.json"
+    ]
 }
 
 // integration tests: general
