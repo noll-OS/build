@@ -3496,11 +3496,12 @@ $(check-selinux-treble-labeling.timestamp): PRIVATE_SEPOLICY := $(sepolicy-binar
 $(check-selinux-treble-labeling.timestamp): PRIVATE_PLATFORM_SEAPP_CONTEXTS := $(platform-seapp-contexts)
 $(check-selinux-treble-labeling.timestamp): PRIVATE_VENDOR_SEAPP_CONTEXTS := $(vendor-seapp-contexts)
 $(check-selinux-treble-labeling.timestamp): PRIVATE_VENDOR_FILE_CONTEXTS := $(vendor-file-contexts)
+$(check-selinux-treble-labeling.timestamp): PRIVATE_TRACKING_LIST_FILE := $(PRODUCT_SELINUX_TREBLE_LABELING_TRACKING_LIST_FILE)
 $(check-selinux-treble-labeling.timestamp): $(HOST_OUT_EXECUTABLES)/treble_labeling_tests \
     $(platform-preinstalled-apps) $(vendor-preinstalled-apps) \
     $(platform-sepolicy-binary) $(sepolicy-binary) $(sepolicy-binary-without-vendor) \
     $(platform-seapp-contexts) $(vendor-seapp-contexts) $(vendor-file-contexts) \
-    $(AAPT2)
+    $(PRODUCT_SELINUX_TREBLE_LABELING_TRACKING_LIST_FILE) $(AAPT2)
 	@rm -rf $@
 	@echo $(PRIVATE_PLATFORM_APPS) > $@.platform_apps.txt
 	@echo $(PRIVATE_VENDOR_APPS) > $@.vendor_apps.txt
@@ -3510,6 +3511,7 @@ $(check-selinux-treble-labeling.timestamp): $(HOST_OUT_EXECUTABLES)/treble_label
     --platform_seapp_contexts $(PRIVATE_PLATFORM_SEAPP_CONTEXTS) \
     --vendor_seapp_contexts $(PRIVATE_VENDOR_SEAPP_CONTEXTS) \
     --vendor_file_contexts $(PRIVATE_VENDOR_FILE_CONTEXTS) \
+    $(if $(PRIVATE_TRACKING_LIST_FILE),--tracking_list_file $(PRIVATE_TRACKING_LIST_FILE)) \
     --aapt2_path $(AAPT2) > $@
 
 .PHONY: check-selinux-treble-labeling
