@@ -6526,7 +6526,7 @@ else ifdef BOARD_PREBUILT_SYSTEM_DLKMIMAGE
 endif
 
 ifeq ($(BUILD_QEMU_IMAGES),true)
-  MK_VBMETA_BOOT_KERNEL_CMDLINE_SH := device/generic/goldfish/tools/mk_vbmeta_boot_params.sh
+  MK_VBMETA_BOOT_KERNEL_CMDLINE_SH := device/generic/goldfish/build/tools/mk_vbmeta_boot_params.sh
   $(BUILT_TARGET_FILES_DIR): $(MK_VBMETA_BOOT_KERNEL_CMDLINE_SH)
 endif
 
@@ -7614,7 +7614,7 @@ $(call dist-for-goals-with-filenametag,updatepackage,$(INTERNAL_UPDATE_PACKAGE_T
 dalvikfiles: $(INTERNAL_DALVIK_MODULES)
 
 ifeq ($(BUILD_QEMU_IMAGES),true)
-MK_QEMU_IMAGE_SH := device/generic/goldfish/tools/mk_qemu_image.sh
+MK_QEMU_IMAGE_SH := device/generic/goldfish/build/tools/mk_qemu_image.sh
 MK_COMBINE_QEMU_IMAGE := $(HOST_OUT_EXECUTABLES)/mk_combined_img
 
 ifdef INSTALLED_SYSTEMIMAGE_TARGET
