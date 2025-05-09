@@ -21,14 +21,16 @@ Given a series of .img files, produces an OTA package that installs thoese image
 import sys
 import os
 import argparse
+import shutil
 import subprocess
 import tempfile
 import logging
 import zipfile
 
 import common
+import ota_metadata_pb2
 from payload_signer import PayloadSigner
-from ota_utils import PayloadGenerator
+from ota_utils import PayloadGenerator, FinalizeMetadata
 from ota_signing_utils import AddSigningArgumentParse
 
 
@@ -60,6 +62,8 @@ def main(argv):
                       help='Paths to output merged ota', required=True)
   parser.add_argument('--max_timestamp', type=int,
                       help='Maximum build timestamp allowed to install this OTA')
+  parser.add_argument("--metadata_proto_file", type=str,
+                      help="Optional OTA metadata proto to use for signing")
   parser.add_argument("-v", action="store_true",
                       help="Enable verbose logging", dest="verbose")
   AddSigningArgumentParse(parser)
@@ -119,6 +123,13 @@ def main(argv):
     with zipfile.ZipFile(args.output, "w") as zfp:
       generator.WriteToZip(zfp)
 
+    if args.package_key and args.metadata_proto_file:
+      temp_zip = common.MakeTempFile(prefix="temp-", suffix=".zip")
+      metadata = ota_metadata_pb2.OtaMetadata()
+      with open(args.metadata_proto_file, "rb") as fp:
+          metadata.ParseFromString(fp.read())
+      shutil.copy(args.output, temp_zip)
+      FinalizeMetadata(metadata, temp_zip, args.output, package_key=args.package_key)
 
 if __name__ == "__main__":
   logging.basicConfig()
