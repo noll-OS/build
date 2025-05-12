@@ -270,6 +270,9 @@ include_makefiles_total := $(words int $(subdir_makefiles))
 
 $(foreach mk,$(subdir_makefiles),$(info [$(call inc_and_print,include_makefiles_inc)/$(include_makefiles_total)] including $(mk) ...)$(eval include $(mk)))
 
+# Unfortunately build/tasks is included at a wrong time and the order is important (b/417070498)
+-include device/generic/goldfish/build/tasks.workaround/emu_img_zip.mk
+
 # Build bootloader.img/radio.img, and unpack the partitions.
 -include vendor/google_devices/$(TARGET_SOC)/prebuilts/misc_bins/update_bootloader_radio_image.mk
 
