@@ -7282,18 +7282,16 @@ _symbols_zip_modules_mapping_files :=
 
 endif # ifeq (,$(TARGET_BUILD_UNBUNDLED))
 
-ifeq (true,$(EMMA_INSTRUMENT))
 #------------------------------------------------------------------
 # An archive of classes for use in generating code-coverage reports
 # These are the uninstrumented versions of any classes that were
 # to be instrumented.
 # Any dependencies are set up later in build/make/core/main.mk.
 
+ifeq (true,$(EMMA_INSTRUMENT))
+# The unbundled build is handled by soong in unbundled.go
 ifeq (,$(TARGET_BUILD_UNBUNDLED))
-  _jacoco_modules := $(call product-installed-modules,$(INTERNAL_PRODUCT))
-else
-  _jacoco_modules := $(unbundled_build_modules)
-endif
+_jacoco_modules := $(call product-installed-modules,$(INTERNAL_PRODUCT))
 
 # This is not ideal, but it is difficult to correctly figure out the actual jacoco report
 # jars we need to add here as dependencies, so we add the device-tests as a dependency when
@@ -7314,6 +7312,7 @@ $(JACOCO_REPORT_CLASSES_ALL): $(SOONG_ZIP) $(foreach m,$(_jacoco_modules),$(ALL_
 
 _jacoco_modules :=
 
+endif # ifeq (,$(TARGET_BUILD_UNBUNDLED))
 endif # EMMA_INSTRUMENT=true
 
 
