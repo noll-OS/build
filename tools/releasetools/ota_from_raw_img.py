@@ -51,6 +51,28 @@ def ResolveBinaryPath(filename, search_path):
   return path
 
 
+def UpdateDynamicPartitionInfo(contents, in_file):
+    with open(in_file, 'r') as fp:
+        for line in fp.readlines():
+            parts = line.split('=', maxsplit=1)
+            if len(parts) != 2:
+                continue
+            contents[parts[0]] = parts[1]
+
+
+def WriteDynamicPartitionInfo(in_file, out_fp):
+    keyvalues = {
+        "virtual_ab": "true",
+        "super_partition_groups": "",
+    }
+    if in_file is not None:
+        UpdateDynamicPartitionInfo(keyvalues, in_file)
+    for key in keyvalues:
+        line = "{}={}\n".format(key, keyvalues[key])
+        out_fp.write(line.encode("utf-8"))
+    out_fp.flush()
+
+
 def main(argv):
   parser = argparse.ArgumentParser(
       prog=argv[0], description="Given a series of .img files, produces a full OTA package that installs thoese images")
@@ -64,6 +86,8 @@ def main(argv):
                       help='Maximum build timestamp allowed to install this OTA')
   parser.add_argument("--metadata_proto_file", type=str,
                       help="Optional OTA metadata proto to use for signing")
+  parser.add_argument("--dynamic_partition_info_file", type=str,
+                      help="Optional dynamic partition info file")
   parser.add_argument("-v", action="store_true",
                       help="Enable verbose logging", dest="verbose")
   AddSigningArgumentParse(parser)
@@ -83,9 +107,7 @@ def main(argv):
   else:
     args.partition_names = args.partition_names.split(",")
   with tempfile.NamedTemporaryFile() as unsigned_payload, tempfile.NamedTemporaryFile() as dynamic_partition_info_file:
-    dynamic_partition_info_file.writelines(
-        [b"virtual_ab=true\n", b"super_partition_groups=\n"])
-    dynamic_partition_info_file.flush()
+    WriteDynamicPartitionInfo(args.dynamic_partition_info_file, dynamic_partition_info_file)
     cmd = [ResolveBinaryPath("delta_generator", args.search_path)]
     cmd.append("--partition_names=" + ":".join(args.partition_names))
     cmd.append("--dynamic_partition_info_file=" +
