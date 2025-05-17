@@ -270,6 +270,9 @@ include_makefiles_total := $(words int $(subdir_makefiles))
 
 $(foreach mk,$(subdir_makefiles),$(info [$(call inc_and_print,include_makefiles_inc)/$(include_makefiles_total)] including $(mk) ...)$(eval include $(mk)))
 
+# Unfortunately build/tasks is included at a wrong time and the order is important (b/417070498)
+-include device/generic/goldfish/build/tasks.workaround/emu_img_zip.mk
+
 # Build bootloader.img/radio.img, and unpack the partitions.
 -include vendor/google_devices/$(TARGET_SOC)/prebuilts/misc_bins/update_bootloader_radio_image.mk
 
@@ -1472,11 +1475,6 @@ else ifneq ($(TARGET_BUILD_APPS),)
       $(if $(ALL_MODULES.$(m).AAR),$(ALL_MODULES.$(m).AAR):$(m).aar)\
       ))
   $(call dist-for-goals,apps_only, $(apps_only_dist_built_files))
-
-  ifeq ($(EMMA_INSTRUMENT),true)
-    $(JACOCO_REPORT_CLASSES_ALL) : $(apps_only_installed_files)
-    $(call dist-for-goals,apps_only, $(JACOCO_REPORT_CLASSES_ALL))
-  endif
 
   # some more files are disted in soong's unbundled_builder module
 
