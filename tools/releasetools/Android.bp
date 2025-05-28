@@ -40,7 +40,6 @@ python_defaults {
         "libavbtool",
     ],
     required: [
-        "care_map_generator",
         "mkbootimg",
     ],
 }
