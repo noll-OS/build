@@ -175,14 +175,19 @@ fn verify_mainline_beta_namespace_flag(
     Ok(())
 }
 
+pub struct ExtendedPermissionsOptions {
+    pub default_permission: ProtoFlagPermission,
+    pub allow_read_write: bool,
+    pub force_read_only: bool,
+}
+
 pub fn parse_flags(
     package: &str,
     container: &str,
     declarations: Vec<Input>,
     values: Vec<Input>,
-    default_permission: ProtoFlagPermission,
-    allow_read_write: bool,
     mainline_beta_namespace_config: Option<PathBuf>,
+    extended_permissions_options: ExtendedPermissionsOptions,
 ) -> Result<Vec<u8>> {
     let mut parsed_flags = ProtoParsedFlags::new();
 
@@ -231,10 +236,13 @@ pub fn parse_flags(
             parsed_flag.set_description(flag_declaration.take_description());
             parsed_flag.bug.append(&mut flag_declaration.bug);
             parsed_flag.set_state(DEFAULT_FLAG_STATE);
-            let flag_permission = if flag_declaration.is_fixed_read_only() {
+            // for fixed read only or forced read only flags, set to read only.
+            let flag_permission = if flag_declaration.is_fixed_read_only()
+                || extended_permissions_options.force_read_only
+            {
                 ProtoFlagPermission::READ_ONLY
             } else {
-                default_permission
+                extended_permissions_options.default_permission
             };
             parsed_flag.set_permission(flag_permission);
             parsed_flag.set_is_fixed_read_only(flag_declaration.is_fixed_read_only());
@@ -276,7 +284,7 @@ pub fn parse_flags(
             .with_context(|| format!("failed to read {}", input.source))?;
         let flag_values = aconfig_protos::flag_values::try_from_text_proto(&contents)
             .with_context(|| input.error_context())?;
-        for flag_value in flag_values.flag_value.into_iter() {
+        for mut flag_value in flag_values.flag_value.into_iter() {
             aconfig_protos::flag_value::verify_fields(&flag_value)
                 .with_context(|| input.error_context())?;
 
@@ -295,6 +303,9 @@ pub fn parse_flags(
                 "failed to set permission of flag {}, since this flag is fixed read only flag",
                 flag_value.name()
             );
+            if extended_permissions_options.force_read_only {
+                flag_value.set_permission(ProtoFlagPermission::READ_ONLY);
+            }
 
             parsed_flag.set_state(flag_value.state());
             if parsed_flag.permission() != flag_value.permission() {
@@ -309,7 +320,7 @@ pub fn parse_flags(
         }
     }
 
-    if !allow_read_write {
+    if !extended_permissions_options.allow_read_write {
         if let Some(pf) = parsed_flags
             .parsed_flag
             .iter()
@@ -461,16 +472,22 @@ pub fn modify_parsed_flags_based_on_mode(
     parsed_flags: ProtoParsedFlags,
     codegen_mode: CodegenMode,
 ) -> Result<Vec<ProtoParsedFlag>> {
-    fn exported_mode_flag_modifier(mut parsed_flag: ProtoParsedFlag) -> ProtoParsedFlag {
+    fn exported_mode_flag_modifier(mut parsed_flag: ProtoParsedFlag) -> Result<ProtoParsedFlag> {
         parsed_flag.set_state(ProtoFlagState::DISABLED);
         parsed_flag.set_permission(ProtoFlagPermission::READ_WRITE);
         parsed_flag.set_is_fixed_read_only(false);
-        parsed_flag
+        let m = parsed_flag.metadata.as_mut().ok_or(anyhow!("missing metadata"))?;
+        m.set_storage(ProtoFlagStorageBackend::ACONFIGD);
+        Ok(parsed_flag)
     }
 
-    fn force_read_only_mode_flag_modifier(mut parsed_flag: ProtoParsedFlag) -> ProtoParsedFlag {
+    fn force_read_only_mode_flag_modifier(
+        mut parsed_flag: ProtoParsedFlag,
+    ) -> Result<ProtoParsedFlag> {
         parsed_flag.set_permission(ProtoFlagPermission::READ_ONLY);
-        parsed_flag
+        let m = parsed_flag.metadata.as_mut().ok_or(anyhow!("missing metadata"))?;
+        m.set_storage(ProtoFlagStorageBackend::NONE);
+        Ok(parsed_flag)
     }
 
     let modified_parsed_flags: Vec<_> = match codegen_mode {
@@ -479,13 +496,13 @@ pub fn modify_parsed_flags_based_on_mode(
             .into_iter()
             .filter(|pf| pf.is_exported())
             .map(exported_mode_flag_modifier)
-            .collect(),
+            .collect::<Result<Vec<_>>>()?,
         CodegenMode::ForceReadOnly => parsed_flags
             .parsed_flag
             .into_iter()
             .filter(|pf| !pf.is_exported())
             .map(force_read_only_mode_flag_modifier)
-            .collect(),
+            .collect::<Result<Vec<_>>>()?,
         CodegenMode::Production | CodegenMode::Test => {
             parsed_flags.parsed_flag.into_iter().collect()
         }
@@ -679,15 +696,19 @@ mod tests {
         let declaration =
             vec![Input { source: "momery".to_string(), reader: Box::new(first_flag.as_bytes()) }];
         let value: Vec<Input> = vec![];
+        let extended_permissions_options = ExtendedPermissionsOptions {
+            default_permission: ProtoFlagPermission::READ_ONLY,
+            allow_read_write: true,
+            force_read_only: false,
+        };
 
         let flags_bytes = crate::commands::parse_flags(
             "com.first",
             "test",
             declaration,
             value,
-            ProtoFlagPermission::READ_ONLY,
-            true,
             None,
+            extended_permissions_options,
         )
         .unwrap();
         let parsed_flags =
@@ -714,15 +735,19 @@ mod tests {
             vec![Input { source: "memory".to_string(), reader: Box::new(first_flag.as_bytes()) }];
 
         let value: Vec<Input> = vec![];
+        let extended_permissions_options = ExtendedPermissionsOptions {
+            default_permission: ProtoFlagPermission::READ_WRITE,
+            allow_read_write: true,
+            force_read_only: false,
+        };
 
         let error = crate::commands::parse_flags(
             "com.argument.package",
             "first.container",
             declaration,
             value,
-            ProtoFlagPermission::READ_WRITE,
-            true,
             None,
+            extended_permissions_options,
         )
         .unwrap_err();
         assert_eq!(
@@ -747,15 +772,19 @@ mod tests {
             vec![Input { source: "memory".to_string(), reader: Box::new(first_flag.as_bytes()) }];
 
         let value: Vec<Input> = vec![];
+        let extended_permissions_options = ExtendedPermissionsOptions {
+            default_permission: ProtoFlagPermission::READ_WRITE,
+            allow_read_write: true,
+            force_read_only: false,
+        };
 
         let error = crate::commands::parse_flags(
             "com.first",
             "argument.container",
             declaration,
             value,
-            ProtoFlagPermission::READ_WRITE,
-            true,
             None,
+            extended_permissions_options,
         )
         .unwrap_err();
         assert_eq!(
@@ -777,15 +806,19 @@ mod tests {
         "#;
         let declaration =
             vec![Input { source: "memory".to_string(), reader: Box::new(first_flag.as_bytes()) }];
+        let extended_permissions_options = ExtendedPermissionsOptions {
+            default_permission: ProtoFlagPermission::READ_WRITE,
+            allow_read_write: false,
+            force_read_only: false,
+        };
 
         let error = crate::commands::parse_flags(
             "com.first",
             "com.first.container",
             declaration,
             vec![],
-            ProtoFlagPermission::READ_WRITE,
-            false,
             None,
+            extended_permissions_options,
         )
         .unwrap_err();
         assert_eq!(
@@ -821,14 +854,18 @@ mod tests {
             source: "memory".to_string(),
             reader: Box::new(first_flag_value.as_bytes()),
         }];
+        let extended_permissions_options = ExtendedPermissionsOptions {
+            default_permission: ProtoFlagPermission::READ_ONLY,
+            allow_read_write: false,
+            force_read_only: false,
+        };
         let error = crate::commands::parse_flags(
             "com.first",
             "com.first.container",
             declaration,
             value,
-            ProtoFlagPermission::READ_ONLY,
-            false,
             None,
+            extended_permissions_options,
         )
         .unwrap_err();
         assert_eq!(
@@ -864,14 +901,116 @@ mod tests {
             source: "memory".to_string(),
             reader: Box::new(first_flag_value.as_bytes()),
         }];
+        let extended_permissions_options = ExtendedPermissionsOptions {
+            default_permission: ProtoFlagPermission::READ_ONLY,
+            allow_read_write: false,
+            force_read_only: false,
+        };
         let flags_bytes = crate::commands::parse_flags(
             "com.first",
             "com.first.container",
             declaration,
             value,
-            ProtoFlagPermission::READ_ONLY,
-            false,
             None,
+            extended_permissions_options,
+        )
+        .unwrap();
+        let parsed_flags =
+            aconfig_protos::parsed_flags::try_from_binary_proto(&flags_bytes).unwrap();
+        assert_eq!(1, parsed_flags.parsed_flag.len());
+        let parsed_flag = parsed_flags.parsed_flag.first().unwrap();
+        assert_eq!(ProtoFlagState::DISABLED, parsed_flag.state());
+        assert_eq!(ProtoFlagPermission::READ_ONLY, parsed_flag.permission());
+    }
+
+    #[test]
+    fn test_parse_flags_force_read_only_convert_read_write_to_read_only_success() {
+        let first_flag = r#"
+        package: "com.first"
+        container: "com.first.container"
+        flag {
+            name: "first"
+            namespace: "first_ns"
+            description: "This is the description of the first flag."
+            bug: "123"
+        }
+        "#;
+        let declaration =
+            vec![Input { source: "memory".to_string(), reader: Box::new(first_flag.as_bytes()) }];
+
+        let first_flag_value = r#"
+        flag_value {
+            package: "com.first"
+            name: "first"
+            state: DISABLED
+            permission: READ_WRITE
+        }
+        "#;
+        let value = vec![Input {
+            source: "memory".to_string(),
+            reader: Box::new(first_flag_value.as_bytes()),
+        }];
+        let extended_permissions_options = ExtendedPermissionsOptions {
+            default_permission: ProtoFlagPermission::READ_ONLY,
+            allow_read_write: true,
+            force_read_only: true,
+        };
+        let flags_bytes = crate::commands::parse_flags(
+            "com.first",
+            "com.first.container",
+            declaration,
+            value,
+            None,
+            extended_permissions_options,
+        )
+        .unwrap();
+        let parsed_flags =
+            aconfig_protos::parsed_flags::try_from_binary_proto(&flags_bytes).unwrap();
+        assert_eq!(1, parsed_flags.parsed_flag.len());
+        let parsed_flag = parsed_flags.parsed_flag.first().unwrap();
+        assert_eq!(ProtoFlagState::DISABLED, parsed_flag.state());
+        assert_eq!(ProtoFlagPermission::READ_ONLY, parsed_flag.permission());
+    }
+
+    #[test]
+    fn test_parse_flags_force_read_only_no_allow_read_write_does_not_fail() {
+        let first_flag = r#"
+        package: "com.first"
+        container: "com.first.container"
+        flag {
+            name: "first"
+            namespace: "first_ns"
+            description: "This is the description of the first flag."
+            bug: "123"
+        }
+        "#;
+        let declaration =
+            vec![Input { source: "memory".to_string(), reader: Box::new(first_flag.as_bytes()) }];
+
+        let first_flag_value = r#"
+        flag_value {
+            package: "com.first"
+            name: "first"
+            state: DISABLED
+            permission: READ_WRITE
+        }
+        "#;
+        let value = vec![Input {
+            source: "memory".to_string(),
+            reader: Box::new(first_flag_value.as_bytes()),
+        }];
+        let extended_permissions_options = ExtendedPermissionsOptions {
+            default_permission: ProtoFlagPermission::READ_ONLY,
+            allow_read_write: false,
+            force_read_only: true,
+        };
+        let flags_bytes = crate::commands::parse_flags(
+            "com.first",
+            "com.first.container",
+            declaration,
+            value,
+            None,
+            extended_permissions_options,
         )
         .unwrap();
         let parsed_flags =
@@ -910,14 +1049,18 @@ mod tests {
             source: "memory".to_string(),
             reader: Box::new(first_flag_value.as_bytes()),
         }];
+        let extended_permissions_options = ExtendedPermissionsOptions {
+            default_permission: ProtoFlagPermission::READ_WRITE,
+            allow_read_write: true,
+            force_read_only: false,
+        };
         let error = crate::commands::parse_flags(
             "com.first",
             "com.first.container",
             declaration,
             value,
-            ProtoFlagPermission::READ_WRITE,
-            true,
             None,
+            extended_permissions_options,
         )
         .unwrap_err();
         assert_eq!(
@@ -946,15 +1089,18 @@ mod tests {
             reader: Box::new(metadata_flag.as_bytes()),
         }];
         let value: Vec<Input> = vec![];
-
+        let extended_permissions_options = ExtendedPermissionsOptions {
+            default_permission: ProtoFlagPermission::READ_ONLY,
+            allow_read_write: true,
+            force_read_only: false,
+        };
         let flags_bytes = crate::commands::parse_flags(
             "com.first",
             "test",
             declaration,
             value,
-            ProtoFlagPermission::READ_ONLY,
-            true,
             None,
+            extended_permissions_options,
         )
         .unwrap();
         let parsed_flags =
@@ -982,15 +1128,19 @@ mod tests {
                 vec![]
             }
         };
+        let extended_permissions_options = ExtendedPermissionsOptions {
+            default_permission: ProtoFlagPermission::READ_WRITE,
+            allow_read_write: true,
+            force_read_only: false,
+        };
 
         let flags_bytes = crate::commands::parse_flags(
             package,
             container,
             declaration,
             value,
-            ProtoFlagPermission::READ_WRITE,
-            true,
             config,
+            extended_permissions_options,
         )?;
 
         let parsed_flags = aconfig_protos::parsed_flags::try_from_binary_proto(&flags_bytes)?;
@@ -1261,13 +1411,19 @@ mod tests {
 
     #[test]
     fn test_modify_parsed_flags_based_on_mode_exported() {
-        let parsed_flags = crate::test::parse_test_flags();
+        let mut parsed_flags = crate::test::parse_test_flags();
+
+        let pf = parsed_flags.parsed_flag.iter_mut().find(|pf| pf.is_exported()).unwrap();
+        let m = pf.metadata.as_mut().unwrap();
+        m.set_storage(ProtoFlagStorageBackend::DEVICE_CONFIG);
+
         let p_parsed_flags =
             modify_parsed_flags_based_on_mode(parsed_flags, CodegenMode::Exported).unwrap();
         assert_eq!(3, p_parsed_flags.len());
         for flag in p_parsed_flags.iter() {
             assert_eq!(ProtoFlagState::DISABLED, flag.state());
             assert_eq!(ProtoFlagPermission::READ_WRITE, flag.permission());
+            assert_eq!(ProtoFlagStorageBackend::ACONFIGD, flag.metadata.storage());
             assert!(!flag.is_fixed_read_only());
             assert!(flag.is_exported());
         }
@@ -1277,6 +1433,24 @@ mod tests {
         let error =
             modify_parsed_flags_based_on_mode(parsed_flags, CodegenMode::Exported).unwrap_err();
         assert_eq!("exported library contains no exported flags", format!("{:?}", error));
+    }
+
+    #[test]
+    fn test_modify_parsed_flags_based_on_mode_forcereadonly() {
+        let mut parsed_flags = crate::test::parse_test_flags();
+
+        let pf = parsed_flags.parsed_flag.iter_mut().find(|pf| !pf.is_exported()).unwrap();
+        let m = pf.metadata.as_mut().unwrap();
+        m.set_storage(ProtoFlagStorageBackend::DEVICE_CONFIG);
+
+        let p_parsed_flags =
+            modify_parsed_flags_based_on_mode(parsed_flags, CodegenMode::ForceReadOnly).unwrap();
+        assert_eq!(6, p_parsed_flags.len());
+        for flag in p_parsed_flags.iter() {
+            assert_eq!(ProtoFlagPermission::READ_ONLY, flag.permission());
+            assert_eq!(ProtoFlagStorageBackend::NONE, flag.metadata.storage());
+            assert!(!flag.is_exported());
+        }
     }
 
     #[test]
