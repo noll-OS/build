@@ -833,10 +833,6 @@ $(call declare-0p-target,$(APKCERTS_FILE))
 .PHONY: apkcerts-list
 apkcerts-list: $(APKCERTS_FILE)
 
-ifneq (,$(TARGET_BUILD_APPS))
-  $(call dist-for-goals, apps_only, $(APKCERTS_FILE):apkcerts.txt)
-endif
-
 # In unbundled builds, apexkeys.txt is built by soong
 ifeq (,$(TARGET_BUILD_APPS))
 
