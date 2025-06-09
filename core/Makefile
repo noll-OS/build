@@ -7969,9 +7969,9 @@ endif # PACK_DESKTOP_ESP_IMAGE
 # This artifact is used in two places:
 # 1. Packed into the recovery image.
 # 2. Added into DIST_DIR so that lab provisioning can download the firmware.
-TARGET_PRODUCT_FW_IMAGE_PACKAGE := gen-$(TARGET_PRODUCT)-firmware-image
-GENERATED_FW_IMAGE := $(call module-built-files,$(TARGET_PRODUCT_FW_IMAGE_PACKAGE))
+GENERATED_FW_IMAGE := $(call module-built-files,desktop-firmware-squashfs)
 
+# The lab provisioning script expects the format BOARD-firmware.img.
 ifneq (,$(GENERATED_FW_IMAGE))
 $(call dist-for-goals,dist_files,$(GENERATED_FW_IMAGE):${TARGET_PRODUCT}-firmware.img)
 endif
