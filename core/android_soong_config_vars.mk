@@ -65,6 +65,7 @@ endif
 $(call soong_config_set_bool,ANDROID,ASAN_ENABLED,$(if $(filter address,$(SANITIZE_TARGET)),true,false))
 $(call soong_config_set_bool,ANDROID,HWASAN_ENABLED,$(if $(filter hwaddress,$(SANITIZE_TARGET)),true,false))
 $(call soong_config_set_bool,ANDROID,SANITIZE_TARGET_SYSTEM_ENABLED,$(if $(filter true,$(SANITIZE_TARGET_SYSTEM)),true,false))
+$(call soong_config_set_bool,ANDROID,HAS_SANITIZE_HOST,$(if $(SANITIZE_HOST),true,false))
 
 # For init.environ.rc
 $(call soong_config_set_bool,ANDROID,GCOV_COVERAGE,$(NATIVE_COVERAGE))
