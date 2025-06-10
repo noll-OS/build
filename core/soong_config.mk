@@ -109,6 +109,7 @@ $(call add_json_str,  DefaultAppCertificate,             $(PRODUCT_DEFAULT_DEV_C
 $(call add_json_list, ExtraOtaKeys,                      $(PRODUCT_EXTRA_OTA_KEYS))
 $(call add_json_list, ExtraOtaRecoveryKeys,              $(PRODUCT_EXTRA_RECOVERY_KEYS))
 $(call add_json_str,  MainlineSepolicyDevCertificates,   $(MAINLINE_SEPOLICY_DEV_CERTIFICATES))
+$(call add_json_str,  MainlineBluetoothSepolicyDevCertificates,   $(MAINLINE_BLUETOOTH_SEPOLICY_DEV_CERTIFICATES))
 
 $(call add_json_str,  AppsDefaultVersionName,            $(APPS_DEFAULT_VERSION_NAME))
 
