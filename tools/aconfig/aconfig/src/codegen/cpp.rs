@@ -725,8 +725,12 @@ namespace com::android::aconfig::test {
 
     };
 
-    std::unique_ptr<flag_provider_interface> provider_ =
-        std::make_unique<flag_provider>();
+    static flag_provider_interface* get_provider_instance() {
+        static flag_provider* instance_ = new flag_provider();
+        return instance_;
+    }
+
+    std::unique_ptr<flag_provider_interface> provider_(get_provider_instance());
 }
 
 bool com_android_aconfig_test_disabled_ro() {
@@ -985,8 +989,12 @@ namespace com::android::aconfig::test {
         bool fingerprint_matches_;
     };
 
-    std::unique_ptr<flag_provider_interface> provider_ =
-        std::make_unique<flag_provider>();
+    static flag_provider_interface* get_provider_instance() {
+        static flag_provider* instance_ = new flag_provider();
+        return instance_;
+    }
+
+    std::unique_ptr<flag_provider_interface> provider_(get_provider_instance());
 }
 
 bool com_android_aconfig_test_disabled_ro() {
@@ -1284,8 +1292,12 @@ namespace com::android::aconfig::test {
             }
     };
 
-    std::unique_ptr<flag_provider_interface> provider_ =
-        std::make_unique<flag_provider>();
+    static flag_provider_interface* get_provider_instance() {
+        static flag_provider* instance_ = new flag_provider();
+        return instance_;
+    }
+
+    std::unique_ptr<flag_provider_interface> provider_(get_provider_instance());
 }
 
 bool com_android_aconfig_test_disabled_ro() {
@@ -1409,8 +1421,12 @@ namespace com::android::aconfig::test {
             }
     };
 
-    std::unique_ptr<flag_provider_interface> provider_ =
-        std::make_unique<flag_provider>();
+    static flag_provider_interface* get_provider_instance() {
+        static flag_provider* instance_ = new flag_provider();
+        return instance_;
+    }
+
+    std::unique_ptr<flag_provider_interface> provider_(get_provider_instance());
 }
 
 bool com_android_aconfig_test_disabled_ro() {
@@ -1533,8 +1549,12 @@ namespace com::android::aconfig::test {
             }
     };
 
-    std::unique_ptr<flag_provider_interface> provider_ =
-        std::make_unique<flag_provider>();
+    static flag_provider_interface* get_provider_instance() {
+        static flag_provider* instance_ = new flag_provider();
+        return instance_;
+    }
+
+    std::unique_ptr<flag_provider_interface> provider_(get_provider_instance());
 }
 
 bool com_android_aconfig_test_disabled_fixed_ro() {
