@@ -453,6 +453,7 @@ $(call add_json_map, PartitionVarsForSoongMigrationOnlyDoNotUse)
   $(call add_json_list, InternalKernelCmdline, $(INTERNAL_KERNEL_CMDLINE))
   $(call add_json_list, InternalBootconfig, $(INTERNAL_BOOTCONFIG))
   $(call add_json_str, InternalBootconfigFile, $(INTERNAL_BOOTCONFIG_FILE))
+  $(call add_json_str, BoardPrebuiltBootImage, $(BOARD_PREBUILT_BOOTIMAGE))
 
   $(call add_json_bool, BuildingSystemOtherImage, $(BUILDING_SYSTEM_OTHER_IMAGE))
 

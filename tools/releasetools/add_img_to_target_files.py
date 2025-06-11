@@ -159,87 +159,6 @@ def GetCareMap(which, imgname):
   return [which, care_map_ranges.to_string_raw()]
 
 
-def AddCareMapForAbOta(output_file, ab_partitions, image_paths):
-  """Generates and adds care_map.pb for a/b partition that has care_map.
-
-  Args:
-    output_file: The output zip file (needs to be already open),
-        or file path to write care_map.pb.
-    ab_partitions: The list of A/B partitions.
-    image_paths: A map from the partition name to the image path.
-  """
-  if not output_file:
-    raise ExternalError('Expected output_file for AddCareMapForAbOta')
-
-  care_map_list = []
-  for partition in ab_partitions:
-    partition = partition.strip()
-    if partition not in PARTITIONS_WITH_CARE_MAP:
-      continue
-
-    verity_block_device = "{}_verity_block_device".format(partition)
-    avb_hashtree_enable = "avb_{}_hashtree_enable".format(partition)
-    if (verity_block_device in OPTIONS.info_dict or
-            OPTIONS.info_dict.get(avb_hashtree_enable) == "true"):
-      if partition not in image_paths:
-        logger.warning('Potential partition with care_map missing from images: %s',
-                       partition)
-        continue
-      image_path = image_paths[partition]
-      if not os.path.exists(image_path):
-        raise ExternalError('Expected image at path {}'.format(image_path))
-
-      care_map = GetCareMap(partition, image_path)
-      if not care_map:
-        continue
-      care_map_list += care_map
-
-      # adds fingerprint field to the care_map
-      # TODO(xunchang) revisit the fingerprint calculation for care_map.
-      partition_props = OPTIONS.info_dict.get(partition + ".build.prop")
-      prop_name_list = ["ro.{}.build.fingerprint".format(partition),
-                        "ro.{}.build.thumbprint".format(partition)]
-
-      present_props = [x for x in prop_name_list if
-                       partition_props and partition_props.GetProp(x)]
-      if not present_props:
-        logger.warning(
-            "fingerprint is not present for partition %s", partition)
-        property_id, fingerprint = "unknown", "unknown"
-      else:
-        property_id = present_props[0]
-        fingerprint = partition_props.GetProp(property_id)
-      care_map_list += [property_id, fingerprint]
-
-  if not care_map_list:
-    return
-
-  # Converts the list into proto buf message by calling care_map_generator; and
-  # writes the result to a temp file.
-  temp_care_map_text = MakeTempFile(prefix="caremap_text-",
-                                           suffix=".txt")
-  with open(temp_care_map_text, 'w') as text_file:
-    text_file.write('\n'.join(care_map_list))
-
-  temp_care_map = MakeTempFile(prefix="caremap-", suffix=".pb")
-  care_map_gen_cmd = ["care_map_generator", temp_care_map_text, temp_care_map]
-  RunAndCheckOutput(care_map_gen_cmd)
-
-  if not isinstance(output_file, zipfile.ZipFile):
-    shutil.copy(temp_care_map, output_file)
-    return
-  # output_file is a zip file
-  care_map_path = "META/care_map.pb"
-  if care_map_path in output_file.namelist():
-    # Copy the temp file into the OPTIONS.input_tmp dir and update the
-    # replace_updated_files_list used by add_img_to_target_files
-    if not OPTIONS.replace_updated_files_list:
-      OPTIONS.replace_updated_files_list = []
-    shutil.copy(temp_care_map, os.path.join(OPTIONS.input_tmp, care_map_path))
-    OPTIONS.replace_updated_files_list.append(care_map_path)
-  else:
-    ZipWrite(output_file, temp_care_map, arcname=care_map_path)
-
 
 class OutputFile(object):
   """A helper class to write a generated file to the given dir or zip.
@@ -1149,19 +1068,6 @@ def AddImagesToTargetFiles(filename):
   banner("radio")
   ab_partitions_txt = os.path.join(OPTIONS.input_tmp, "META",
                                    "ab_partitions.txt")
-  if os.path.exists(ab_partitions_txt):
-    with open(ab_partitions_txt) as f:
-      ab_partitions = f.read().splitlines()
-
-    # For devices using A/B update, make sure we have all the needed images
-    # ready under IMAGES/ or RADIO/.
-    CheckAbOtaImages(output_zip, ab_partitions)
-
-    # Generate care_map.pb for ab_partitions, then write this file to
-    # target_files package.
-    output_care_map = os.path.join(OPTIONS.input_tmp, "META", "care_map.pb")
-    AddCareMapForAbOta(output_zip if output_zip else output_care_map,
-                       ab_partitions, partitions)
 
   # Radio images that need to be packed into IMAGES/, and product-img.zip.
   pack_radioimages_txt = os.path.join(
