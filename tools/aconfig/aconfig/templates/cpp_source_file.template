@@ -288,8 +288,12 @@ namespace {cpp_namespace} \{
 
 {{ -endif }}
 
-std::unique_ptr<flag_provider_interface> provider_ =
-    std::make_unique<flag_provider>();
+    static flag_provider_interface* get_provider_instance() \{
+        static flag_provider* instance_ = new flag_provider();
+        return instance_;
+    }
+
+    std::unique_ptr<flag_provider_interface> provider_(get_provider_instance());
 }
 
 {{ for item in class_elements }}

@@ -454,6 +454,7 @@ $(call add_json_map, PartitionVarsForSoongMigrationOnlyDoNotUse)
   $(call add_json_list, InternalBootconfig, $(INTERNAL_BOOTCONFIG))
   $(call add_json_str, InternalBootconfigFile, $(INTERNAL_BOOTCONFIG_FILE))
   $(call add_json_str, BoardPrebuiltBootImage, $(BOARD_PREBUILT_BOOTIMAGE))
+  $(call add_json_str, BoardKernelPath16k, $(BOARD_KERNEL_PATH_16K))
 
   $(call add_json_bool, BuildingSystemOtherImage, $(BUILDING_SYSTEM_OTHER_IMAGE))
 
@@ -620,6 +621,8 @@ $(call add_json_list, ProductHostPackages, $(PRODUCT_HOST_PACKAGES))
 $(call add_json_bool, EnforceSELinuxTrebleLabeling, $(filter true,$(PRODUCT_ENFORCE_SELINUX_TREBLE_LABELING)))
 
 $(call add_json_str, SELinuxTrebleLabelingTrackingListFile, $(filter true,$(PRODUCT_SELINUX_TREBLE_LABELING_TRACKING_LIST_FILE)))
+
+$(call add_json_bool, BuildOTAPackage, $(call invert_bool,$(filter true,$(TARGET_SKIP_OTA_PACKAGE))))
 
 $(call json_end)
 
