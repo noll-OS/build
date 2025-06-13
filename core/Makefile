@@ -5817,6 +5817,7 @@ INTERNAL_OTATOOLS_MODULES := \
   build_super_image \
   build_verity_metadata \
   build_verity_tree \
+  care_map_generator \
   check_ota_package_signature \
   check_target_files_signatures \
   check_target_files_vintf \
