@@ -1061,6 +1061,7 @@ $(INSTALLED_DTBOIMAGE_TARGET): $(BOARD_PREBUILT_DTBOIMAGE) $(AVBTOOL) $(BOARD_AV
 	$(AVBTOOL) add_hash_footer \
 	    --image $@ \
 	    $(call get-partition-size-argument,$(BOARD_DTBOIMG_PARTITION_SIZE)) \
+	    $(if $(RELEASE_DTBO_DETERMINISTIC_AVB_SALT), --salt $$(sha256sum $(BUILD_NUMBER_FILE) $(BUILD_DATETIME_FILE) | cut -d " " -f 1 | tr -d '\n') ) \
 	    --partition_name dtbo $(INTERNAL_AVB_DTBO_SIGNING_ARGS) \
 	    $(BOARD_AVB_DTBO_ADD_HASH_FOOTER_ARGS)
 
@@ -1200,6 +1201,7 @@ $(INSTALLED_DTBOIMAGE_16KB_TARGET): $(BOARD_PREBUILT_DTBOIMAGE_16KB) $(AVBTOOL) 
 	$(AVBTOOL) add_hash_footer \
 	    --image $@ \
 	    $(call get-partition-size-argument,$(BOARD_DTBOIMG_PARTITION_SIZE)) \
+	    $(if $(RELEASE_DTBO_DETERMINISTIC_AVB_SALT), --salt $$(sha256sum $(BUILD_NUMBER_FILE) $(BUILD_DATETIME_FILE) | cut -d " " -f 1 | tr -d '\n') ) \
 	    --partition_name dtbo $(INTERNAL_AVB_DTBO_SIGNING_ARGS) \
 	    $(BOARD_AVB_DTBO_ADD_HASH_FOOTER_ARGS)
 
