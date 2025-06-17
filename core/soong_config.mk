@@ -462,6 +462,12 @@ $(call add_json_map, PartitionVarsForSoongMigrationOnlyDoNotUse)
   $(call add_json_str, BoardPrebuiltDtboImage16kb, $(BOARD_PREBUILT_DTBOIMAGE_16KB))
   $(call add_json_bool, Board16kOtaUseIncremental, $(BOARD_16K_OTA_USE_INCREMENTAL))
 
+  # radio
+  $(call add_json_str, RadioFilePath, $(RADIO_FILE_PATH))
+  $(call add_json_list, AbOtaRadioPartitions, $(AB_OTA_RADIO_PARTITIONS))
+  $(call add_json_str, BootloaderFilePath, $(BOOTLOADER_FILE_PATH))
+  $(call add_json_list, AbOtaBootloaderPartitions, $(AB_OTA_BOOTLOADER_PARTITIONS))
+
   $(call add_json_bool, BuildingSystemOtherImage, $(BUILDING_SYSTEM_OTHER_IMAGE))
 
   # super image stuff
