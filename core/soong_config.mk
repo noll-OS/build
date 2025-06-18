@@ -461,6 +461,7 @@ $(call add_json_map, PartitionVarsForSoongMigrationOnlyDoNotUse)
   $(call add_json_str, BoardDtboPartitionSize, $(BOARD_DTBOIMG_PARTITION_SIZE))
   $(call add_json_str, BoardPrebuiltDtboImage16kb, $(BOARD_PREBUILT_DTBOIMAGE_16KB))
   $(call add_json_bool, Board16kOtaUseIncremental, $(BOARD_16K_OTA_USE_INCREMENTAL))
+  $(call add_json_str, BoardPrebuiltDtbDir, $(BOARD_PREBUILT_DTBIMAGE_DIR))
 
   # radio
   $(call add_json_str, RadioFilePath, $(RADIO_FILE_PATH))
