@@ -158,6 +158,7 @@ $(call add_json_bool, Malloc_zero_contents,              $(call invert_bool,$(fi
 $(call add_json_bool, Malloc_pattern_fill_contents,      $(MALLOC_PATTERN_FILL_CONTENTS))
 $(call add_json_str,  Override_rs_driver,                $(OVERRIDE_RS_DRIVER))
 $(call add_json_str,  DeviceMaxPageSizeSupported,        $(TARGET_MAX_PAGE_SIZE_SUPPORTED))
+$(call add_json_bool, DeviceCheckPrebuiltMaxPageSize,    $(filter true,$(TARGET_CHECK_PREBUILT_MAX_PAGE_SIZE)))
 $(call add_json_bool, DeviceNoBionicPageSizeMacro,       $(filter true,$(TARGET_NO_BIONIC_PAGE_SIZE_MACRO)))
 
 $(call add_json_bool, UncompressPrivAppDex,              $(call invert_bool,$(filter true,$(DONT_UNCOMPRESS_PRIV_APPS_DEXS))))
@@ -301,6 +302,7 @@ $(call add_json_bool, BuildBrokenIncorrectPartitionImages, $(filter true,$(BUILD
 $(call add_json_list, BuildBrokenInputDirModules,          $(BUILD_BROKEN_INPUT_DIR_MODULES))
 $(call add_json_bool, BuildBrokenDontCheckSystemSdk,       $(filter true,$(BUILD_BROKEN_DONT_CHECK_SYSTEMSDK)))
 $(call add_json_bool, BuildBrokenDupSysprop,               $(filter true,$(BUILD_BROKEN_DUP_SYSPROP)))
+$(call add_json_bool, BuildBrokenPrebuiltELFFiles,         $(filter true,$(BUILD_BROKEN_PREBUILT_ELF_FILES)))
 
 $(call add_json_bool, BuildDebugfsRestrictionsEnabled, $(filter true,$(PRODUCT_SET_DEBUGFS_RESTRICTIONS)))
 
