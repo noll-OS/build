@@ -536,6 +536,7 @@ PRODUCT_PACKAGES_DEBUG := \
     libclang_rt.ubsan_standalone \
     logpersist.start \
     logtagd.rc \
+    lpmodify \
     ot-cli-ftd \
     ot-ctl \
     overlay_remounter \
