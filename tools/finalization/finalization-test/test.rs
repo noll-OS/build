@@ -127,4 +127,18 @@ mod tests {
         let value = &RELEASE_CONFIGS.flags[next]["RELEASE_HIDDEN_API_EXPORTABLE_STUBS"];
         assert_eq!(value, "true");
     }
+
+    #[test]
+    fn test_only_canary_release_config_has_codename_canary() {
+        // invariant: only the canary release config ("canary", aliased to "zp11") sets codename to
+        // CANARY; no release config inherits from the canary release config
+        let canary = &RELEASE_CONFIGS.aliases["canary"];
+        let value = &RELEASE_CONFIGS.flags[canary]["RELEASE_PLATFORM_VERSION_CODENAME"];
+        assert_eq!(value, "CANARY");
+
+        for release_config in RELEASE_CONFIGS.flags.keys().filter(|key| *key != canary) {
+            let value = &RELEASE_CONFIGS.flags[release_config]["RELEASE_PLATFORM_VERSION_CODENAME"];
+            assert_ne!(value, "CANARY");
+        }
+    }
 }
