@@ -73,7 +73,7 @@ mod tests {
         // the version in trunk can be one less than the version in next (during the intermediate
         // state where next is REL but we haven't created prebuilts/sdk/<new-version> yet), or the
         // version in trunk is identical to the one in next
-        let next = &RELEASE_CONFIGS.next;
+        let next = &RELEASE_CONFIGS.aliases["next"];
         if RELEASE_CONFIGS.flags[next]["RELEASE_PLATFORM_VERSION_CODENAME"] != "REL" {
             // expect the versions to be identical
             assert_eq!(
@@ -123,7 +123,7 @@ mod tests {
         // invariant: RELEASE_HIDDEN_API_EXPORTABLE_STUBS is set to `true` in `next`, because we'll
         // cut an Android release from this release config (the flag is too expensive in terms of
         // build performance to enable everywhere)
-        let next = &RELEASE_CONFIGS.next;
+        let next = &RELEASE_CONFIGS.aliases["next"];
         let value = &RELEASE_CONFIGS.flags[next]["RELEASE_HIDDEN_API_EXPORTABLE_STUBS"];
         assert_eq!(value, "true");
     }
