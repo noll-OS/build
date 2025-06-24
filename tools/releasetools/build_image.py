@@ -742,19 +742,6 @@ def ImagePropFromGlobalDict(glob_dict, mount_point):
   for p in common_props:
     copy_prop(p, p)
 
-  ro_mount_points = set([
-      "odm",
-      "odm_dlkm",
-      "oem",
-      "product",
-      "system",
-      "system_dlkm",
-      "system_ext",
-      "system_other",
-      "vendor",
-      "vendor_dlkm",
-  ])
-
   # Tuple layout: (readonly, specific prop, general prop)
   fmt_props = (
       # Generic first, then specific file type.
@@ -965,6 +952,18 @@ def CopyInputDirectory(src, dst, filter_file):
         os.makedirs(os.path.dirname(full_dst), exist_ok=True)
         os.link(full_src, full_dst, follow_symlinks=False)
 
+ro_mount_points = set([
+    "odm",
+    "odm_dlkm",
+    "oem",
+    "product",
+    "system",
+    "system_dlkm",
+    "system_ext",
+    "system_other",
+    "vendor",
+    "vendor_dlkm",
+])
 
 def main(argv):
   parser = argparse.ArgumentParser(
@@ -1001,6 +1000,12 @@ def main(argv):
     # BuildImage().
     image_properties = glob_dict
     TryParseFingerprintAndTimestamp(image_properties)
+    if glob_dict["mount_point"] in ro_mount_points:
+      if not "journal_size" in image_properties:
+        image_properties["journal_size"] = "0"
+      if not "extfs_rsv_pct" in image_properties:
+        image_properties["extfs_rsv_pct"] = "0"
+      image_properties["ro_mount_point"] = "1"
   else:
     image_filename = os.path.basename(args.out_file)
     mount_point = ""
