@@ -50,10 +50,12 @@ python_binary_host {
         "releasetools_ota_from_target_files",
     ],
     required: [
+        "aapt2",
         "apexd_host",
         "checkvintf",
         "host_init_verifier",
         "secilc",
+        "treble_labeling_tests",
     ],
     target: {
         darwin: {
