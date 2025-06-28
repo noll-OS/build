@@ -1486,10 +1486,6 @@ else ifeq ($(TARGET_BUILD_UNBUNDLED),$(TARGET_BUILD_UNBUNDLED_IMAGE))
   # can include java-related targets that would cause building framework java
   # sources in a droidcore full build.
 
-  $(call dist-for-goals, droidcore, \
-    $(APPCOMPAT_ZIP) \
-  )
-
   # We dist the following targets for droidcore-unbundled (and droidcore since
   # droidcore depends on droidcore-unbundled). The droidcore-unbundled target
   # is a subset of droidcore. It can be used used for an unbundled build to
