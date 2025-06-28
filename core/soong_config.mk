@@ -462,6 +462,8 @@ $(call add_json_map, PartitionVarsForSoongMigrationOnlyDoNotUse)
   $(call add_json_str, BoardPrebuiltDtboImage16kb, $(BOARD_PREBUILT_DTBOIMAGE_16KB))
   $(call add_json_bool, Board16kOtaUseIncremental, $(BOARD_16K_OTA_USE_INCREMENTAL))
   $(call add_json_str, BoardPrebuiltDtbDir, $(BOARD_PREBUILT_DTBIMAGE_DIR))
+  $(call add_json_list, BoardKernelModules16K, $(BOARD_KERNEL_MODULES_16K))
+  $(call add_json_list, BoardKernelModulesLoad16K, $(BOARD_KERNEL_MODULES_LOAD_16K))
 
   # radio
   $(call add_json_str, RadioFilePath, $(RADIO_FILE_PATH))
