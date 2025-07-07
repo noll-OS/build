@@ -72,6 +72,8 @@ function setup_cog_env_if_needed() {
     return 0
   fi
 
+  clean_deleted_workspaces_in_cartfs
+
   setup_cog_symlink
 
   export ANDROID_BUILD_ENVIRONMENT_CONFIG="googler-cog"
@@ -111,6 +113,13 @@ function setup_cog_symlink() {
   fi
 
   local link_destination="${HOME}/.cog/android-build-out"
+
+  # When cartfs is mounted, use it as the destination for output directory.
+  local cartfs_mount_point=$(cartfs_mount_point)
+  if [[ -n "$cartfs_mount_point" ]]; then
+    local cog_workspace_name="$(basename "$(dirname "${top}")")"
+    link_destination="${cartfs_mount_point}/${cog_workspace_name}/out"
+  fi
 
   # remove existing out/ dir if it exists
   if [[ -d "$out_dir" ]]; then
@@ -232,4 +241,35 @@ function import_build_vars()
     fi
     eval "$script"
     return $?
+}
+
+function cartfs_mount_point() {
+  local cartfs_mount_point="$(findmnt -t fuse -O "user_id=$(id -u cartfs)" | tail -n +2 | awk '{print $1}')"
+  if [[ -n "$cartfs_mount_point" ]] && findmnt "$cartfs_mount_point" >/dev/null 2>&1; then
+    echo "$cartfs_mount_point"
+  else
+    echo ""
+  fi
+}
+
+# Deletes cartfs folders that are mapped to deleted workspaces.
+function clean_deleted_workspaces_in_cartfs() {
+  local cartfs_mount_point=$(cartfs_mount_point)
+  if [[ -n "$cartfs_mount_point" ]]; then
+    local folders_list
+    folders_list=$(find "$cartfs_mount_point" -maxdepth 1 -type d)
+    if [[ -n "$folders_list" ]]; then
+      while read -r folder; do
+        if [[ "$folder" != "$cartfs_mount_point" ]]; then
+          local workspace_name="$(basename "${folder}")"
+          local workspaces_path="$(dirname "$(dirname "${top}")")"
+          local full_path="${workspaces_path}/${workspace_name}"
+          if [[ ! -d "${full_path}" ]]; then
+            echo "The workspace ${workspace_name} does not exist, deleting ${folder} from cartfs"
+            rm -Rf "${folder}"
+          fi
+        fi
+      done <<< "$folders_list"
+    fi
+  fi
 }
