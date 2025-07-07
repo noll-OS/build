@@ -7925,22 +7925,6 @@ MAIN_SDK_ZIP  := $(INTERNAL_SDK_TARGET)
 endif # sdk in MAKECMDGOALS
 
 # -----------------------------------------------------------------
-# Findbugs
-INTERNAL_FINDBUGS_XML_TARGET := $(PRODUCT_OUT)/findbugs.xml
-INTERNAL_FINDBUGS_HTML_TARGET := $(PRODUCT_OUT)/findbugs.html
-$(INTERNAL_FINDBUGS_XML_TARGET): $(ALL_FINDBUGS_FILES)
-	@echo UnionBugs: $@
-	$(hide) $(FINDBUGS_DIR)/unionBugs $(ALL_FINDBUGS_FILES) \
-	> $@
-$(INTERNAL_FINDBUGS_HTML_TARGET): $(INTERNAL_FINDBUGS_XML_TARGET)
-	@echo ConvertXmlToText: $@
-	$(hide) $(FINDBUGS_DIR)/convertXmlToText -html:fancy.xsl \
-	$(INTERNAL_FINDBUGS_XML_TARGET) > $@
-
-# -----------------------------------------------------------------
-# Findbugs
-
-# -----------------------------------------------------------------
 # These are some additional build tasks that need to be run.
 ifneq ($(dont_bother),true)
 task_makefiles := \
