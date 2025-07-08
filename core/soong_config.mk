@@ -577,6 +577,9 @@ $(call add_json_map, PartitionVarsForSoongMigrationOnlyDoNotUse)
 
   # Used to generate recovery partition
   $(call add_json_str, TargetScreenDensity, $(TARGET_SCREEN_DENSITY))
+  $(call add_json_str, TargetRecoveryFstab, $(TARGET_RECOVERY_FSTAB))
+  $(call add_json_str, TargetRecoveryFstabGenrule, $(TARGET_RECOVERY_FSTAB_GENRULE))
+  $(call add_json_str, TargetRecoveryFstabDefault, $(strip $(wildcard $(TARGET_DEVICE_DIR)/recovery.fstab)))
 
   # Used to generate /recovery/root/build.prop
   $(call add_json_map, PrivateRecoveryUiProperties)
