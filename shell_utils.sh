@@ -244,11 +244,12 @@ function import_build_vars()
 }
 
 function cartfs_mount_point() {
-  local cartfs_mount_point="$(findmnt -t fuse -O "user_id=$(id -u cartfs)" | tail -n +2 | awk '{print $1}')"
-  if [[ -n "$cartfs_mount_point" ]] && findmnt "$cartfs_mount_point" >/dev/null 2>&1; then
+  local cartfs_user_id="$(id -u cartfs 2>/dev/null)"
+  local cartfs_mount_point="$(findmnt -t fuse -O "user_id=${cartfs_user_id}" | tail -n +2 | awk '{print $1}')"
+  # Making sure $cartfs_user_id is not empty since findmnt will return mounts
+  # started by root when it is.
+  if [[ -n "$cartfs_user_id" ]] && [[ -n "$cartfs_mount_point" ]] && findmnt "$cartfs_mount_point" >/dev/null 2>&1; then
     echo "$cartfs_mount_point"
-  else
-    echo ""
   fi
 }
 
@@ -259,13 +260,16 @@ function clean_deleted_workspaces_in_cartfs() {
     local folders_list
     folders_list=$(find "$cartfs_mount_point" -maxdepth 1 -type d)
     if [[ -n "$folders_list" ]]; then
+      local log_file="${HOME}/.cartfs/cartfs_workspace_deletion.log"
+      mkdir -p "$(dirname "${log_file}")"
       while read -r folder; do
         if [[ "$folder" != "$cartfs_mount_point" ]]; then
           local workspace_name="$(basename "${folder}")"
           local workspaces_path="$(dirname "$(dirname "${top}")")"
           local full_path="${workspaces_path}/${workspace_name}"
           if [[ ! -d "${full_path}" ]]; then
-            echo "The workspace ${workspace_name} does not exist, deleting ${folder} from cartfs"
+            local log_timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+            echo "${log_timestamp}: The workspace ${workspace_name} does not exist, deleting ${folder} from cartfs" >> "${log_file}"
             rm -Rf "${folder}"
           fi
         fi
