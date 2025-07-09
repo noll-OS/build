@@ -7989,6 +7989,10 @@ $(call dist-for-goals,dist_files,$(GENERATED_FW_IMAGE):${TARGET_PRODUCT}-firmwar
 endif
 
 # -----------------------------------------------------------------
+# Desktop generated partition image.
+GENERATED_PARTITION_IMAGE := $(call module-built-files,gen-partition-image)
+
+# -----------------------------------------------------------------
 # Desktop pack image hook.
 ifneq (,$(strip $(PACK_DESKTOP_FILESYSTEM_IMAGES)))
 PACK_IMAGE_TARGET := $(PRODUCT_OUT)/android-desktop_image.bin
@@ -8012,13 +8016,13 @@ endif # PACK_DESKTOP_FILESYSTEM_IMAGES
 # Desktop pack recovery image hook.
 ifeq ($(BOARD_USES_DESKTOP_RECOVERY_IMAGE),true)
 PACK_RECOVERY_IMAGE_TARGET := $(PRODUCT_OUT)/android-desktop_recovery_image.bin
-PACK_RECOVERY_IMAGE_ARGS := --noarchive --recovery --firmware $(GENERATED_FW_IMAGE)
+PACK_RECOVERY_IMAGE_ARGS := --noarchive --recovery --firmware $(GENERATED_FW_IMAGE) --partition-image $(GENERATED_PARTITION_IMAGE)
 
 ifneq (,$(strip $(PACK_RECOVERY_IMAGE_EXPERIMENTAL)))
 PACK_RECOVERY_IMAGE_ARGS += --experimental
 endif # PACK_RECOVERY_IMAGE_EXPERIMENTAL
 
-$(PACK_RECOVERY_IMAGE_TARGET): $(PACK_IMAGE_DEPS) $(PRODUCT_OUT)/recovery-kernel $(GENERATED_FW_IMAGE)
+$(PACK_RECOVERY_IMAGE_TARGET): $(PACK_IMAGE_DEPS) $(PRODUCT_OUT)/recovery-kernel $(GENERATED_FW_IMAGE) $(GENERATED_PARTITION_IMAGE)
 	$(PACK_IMAGE_SCRIPT) --out_dir $(PRODUCT_OUT) $(PACK_RECOVERY_IMAGE_ARGS)
 
 PACKED_RECOVERY_IMAGE_ARCHIVE_TARGET := $(PACK_RECOVERY_IMAGE_TARGET).zst
@@ -8062,13 +8066,13 @@ endif # BOARD_USES_DESKTOP_RECOVERY_IMAGE
 # Desktop pack update image hook.
 ifeq ($(BOARD_USES_DESKTOP_UPDATE_IMAGE),true)
 PACK_UPDATE_IMAGE_TARGET := $(PRODUCT_OUT)/android-desktop_update_image.bin
-PACK_UPDATE_IMAGE_ARGS := --noarchive --update --firmware $(GENERATED_FW_IMAGE)
+PACK_UPDATE_IMAGE_ARGS := --noarchive --update --firmware $(GENERATED_FW_IMAGE) --partition-image $(GENERATED_PARTITION_IMAGE)
 
 ifneq (,$(strip $(PACK_UPDATE_IMAGE_EXPERIMENTAL)))
 PACK_UPDATE_IMAGE_ARGS += --experimental
 endif # PACK_UPDATE_IMAGE_EXPERIMENTAL
 
-$(PACK_UPDATE_IMAGE_TARGET): $(PACK_IMAGE_DEPS) $(PRODUCT_OUT)/update-kernel $(GENERATED_FW_IMAGE)
+$(PACK_UPDATE_IMAGE_TARGET): $(PACK_IMAGE_DEPS) $(PRODUCT_OUT)/update-kernel $(GENERATED_FW_IMAGE) $(GENERATED_PARTITION_IMAGE)
 	$(PACK_IMAGE_SCRIPT) --out_dir $(PRODUCT_OUT) $(PACK_UPDATE_IMAGE_ARGS)
 
 PACKED_UPDATE_IMAGE_ARCHIVE_TARGET := $(PACK_UPDATE_IMAGE_TARGET).zst
