@@ -113,7 +113,7 @@ $(cts_files_metadata): $(file_metadata_generation_tool) $(aapt2_tool) $(compatib
 	--aapt2 $(PRIVATE_AAPT2_TOOL) --sdk_version $(PRIVATE_SDK_VERSION) --output $@
 
 ALL_TARGETS.$(cts_files_metadata).META_LIC:=$(module_license_metadata)
-$(call dist-for-goals, cts-api-coverage, $(cts_files_metadata))
+$(call dist-for-goals, cts, $(cts_files_metadata))
 
 # For producing CTS coverage reports.
 # Run "make cts-test-coverage" in the $ANDROID_BUILD_TOP directory.
