@@ -273,6 +273,9 @@ ALL_INSTALLED_BUILD_PROP_FILES := \
   $(INSTALLED_SYSTEM_EXT_BUILD_PROP_TARGET) \
   $(INSTALLED_RAMDISK_BUILD_PROP_TARGET)
 
+.PHONY: build-props
+build-props: $(ALL_INSTALLED_BUILD_PROP_FILES)
+
 # $1 installed file path, e.g. out/target/product/vsoc_x86_64/system/build.prop
 define is-build-prop
 $(if $(findstring $1,$(ALL_INSTALLED_BUILD_PROP_FILES)),Y)

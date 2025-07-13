@@ -5289,6 +5289,67 @@ INTERNAL_ALLIMAGES_FILES := \
     $(INTERNAL_SYSTEM_DLKMIMAGE_FILES) \
     $(INTERNAL_PVMFWIMAGE_FILES) \
 
+FULLER_ALLIMAGES_FILES := $(INTERNAL_ALLIMAGES_FILES) \
+    $(filter \
+        $(TARGET_DEBUG_RAMDISK_OUT)/% \
+        $(TARGET_RAMDISK_OUT)/% \
+        $(TARGET_RECOVERY_OUT)/% \
+        $(TARGET_VENDOR_KERNEL_RAMDISK_OUT)/% \
+        $(TARGET_VENDOR_RAMDISK_OUT)/% \
+        ,$(ALL_DEFAULT_INSTALLED_MODULES))
+
+define write-allimages-file-list
+    $(file >$(PRODUCT_OUT)/allimages-file-list.txt,$(sort $(FULLER_ALLIMAGES_FILES)))
+endef
+
+.PHONY: allimages-file-list
+allimages-file-list: $(call write-allimages-file-list)
+
+ALL_SYSCONFIG_FILES := $(filter \
+    $(TARGET_OUT)/etc/classpaths/systemserverclasspath.pb \
+    $(TARGET_OUT)/etc/sysconfig/% \
+    $(TARGET_OUT_SYSTEM_EXT)/etc/sysconfig/% \
+    $(TARGET_OUT_PRODUCT)/etc/sysconfig/%  \
+    $(TARGET_OUT_VENDOR)/etc/sysconfig/% \
+    $(TARGET_OUT_ODM)/etc/sysconfig/% \
+    $(TARGET_OUT)/etc/permissions/%  \
+    $(TARGET_OUT_SYSTEM_EXT)/etc/permissions/% \
+    $(TARGET_OUT_PRODUCT)/etc/permissions/%  \
+    $(TARGET_OUT_VENDOR)/etc/permissions/% \
+    $(TARGET_OUT_ODM)/etc/permissions/% \
+    $(TARGET_OUT)/etc/default-permissions/% \
+    $(TARGET_OUT_SYSTEM_EXT)/etc/default-permissions/% \
+    $(TARGET_OUT_PRODUCT)/etc/default-permissions/%  \
+    $(TARGET_OUT_VENDOR)/etc/default-permissions/% \
+    $(TARGET_OUT_ODM)/etc/default-permissions/% \
+    ,$(INTERNAL_ALLIMAGES_FILES))
+
+.PHONY: sysconfigs
+sysconfigs: $(ALL_SYSCONFIG_FILES)
+
+ALL_VINTF_FILES := $(filter \
+    $(TARGET_OUT)/etc/vintf/% \
+    $(TARGET_OUT_SYSTEM_EXT)/etc/vintf/% \
+    $(TARGET_OUT_PRODUCT)/etc/vintf/%  \
+    $(TARGET_OUT_VENDOR)/etc/vintf/% \
+    $(TARGET_OUT_ODM)/etc/vintf/% \
+    ,$(INTERNAL_ALLIMAGES_FILES))
+
+.PHONY: vintfs
+vintfs: $(ALL_VINTF_FILES)
+
+adevtool-state-collection-inputs: \
+    allimages-file-list \
+    build-props \
+    $(INSTALLED_RECOVERY_BUILD_PROP_TARGET) \
+    module-info \
+    selinux_policy \
+    sepolicy.recovery \
+    sysconfigs \
+    vintfs \
+
+.PHONY: adevtool-state-collection-inputs
+
 # -----------------------------------------------------------------
 # Run apex_sepolicy_tests for all installed APEXes
 
