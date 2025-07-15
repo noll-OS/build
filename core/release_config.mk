@@ -106,7 +106,8 @@ _flags_varmk:=$(_flags_file:.vars=.varmk)
 # Note: The lack of $(KATI_extra_file_deps) is intentional.  Since only the final build flag values for
 # *THIS* release config matter for analysis, we don't need to re-run Kati if there were input changes
 # that did not cause any changes in the final state of this release config.
-$(KATI_shell_no_rerun $(OUT_DIR)/release-config $(_args) >$(OUT_DIR)/release-config.${TARGET_PRODUCT}.out && touch -t 200001010000 $(_flags_varmk))
+# TODO(b/432018125): Verify if re-running fixes the bug before switching this back to KATI_shell_no_rerun.
+$(shell $(OUT_DIR)/release-config $(_args) >$(OUT_DIR)/release-config.${TARGET_PRODUCT}.out && touch -t 200001010000 $(_flags_varmk))
 $(if $(filter-out 0,$(.SHELLSTATUS)),$(error release-config failed to run))
 ifneq (,$(_final_product_config_pass))
     # Save the final version of the config.
