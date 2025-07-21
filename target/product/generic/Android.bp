@@ -727,6 +727,7 @@ system_image_defaults {
             "bootctl",
             "dmuserd",
             "evemu-record",
+            "fio",
             "idlcli",
             "init-debug.rc",
             "iotop",
