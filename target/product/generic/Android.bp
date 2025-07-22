@@ -926,6 +926,11 @@ system_image_defaults {
                     "ContactsPicker", // handheld_system (RELEASE_ACONFIG_INCLUDE_CONTACTS_PICKER_APP)
                 ],
                 default: [],
+            }) + select(release_flag("RELEASE_PACKAGE_COMPUTER_CONTROL"), {
+                true: [
+                    "VirtualDeviceManager", // media_system (RELEASE_PACKAGE_COMPUTER_CONTROL)
+                ],
+                default: [],
             }),
         },
         prefer32: {
