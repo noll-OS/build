@@ -536,7 +536,6 @@ PRODUCT_PACKAGES_DEBUG := \
     arping \
     dmuserd \
     evemu-record \
-    fio \
     idlcli \
     init-debug.rc \
     iotop \
