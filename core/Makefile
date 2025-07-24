@@ -6679,9 +6679,6 @@ endif # not (BUILDING_VENDOR_BOOT_IMAGE and BOARD_USES_RECOVERY_AS_BOOT)
 endif # INSTALLED_RECOVERYIMAGE_TARGET defined or BOARD_USES_RECOVERY_AS_BOOT is true
 	@# Components of the boot image
 	$(hide) mkdir -p $(zip_root)/BOOT
-	$(hide) mkdir -p $(zip_root)/ROOT
-	$(hide) $(call package_files-copy-root, \
-	    $(TARGET_ROOT_OUT),$(zip_root)/ROOT)
 	@# If we are using recovery as boot, this is already done when processing recovery.
 ifneq ($(BOARD_USES_RECOVERY_AS_BOOT),true)
 	$(hide) $(call package_files-copy-root, \
@@ -6763,6 +6760,10 @@ else
 	$(hide) $(call package_files-copy-root, \
 	    $(SYSTEMIMAGE_SOURCE_DIR),$(zip_root)/SYSTEM)
 endif
+	@# Content of the root folder
+	$(hide) mkdir -p $(zip_root)/ROOT
+	$(hide) $(call package_files-copy-root, \
+	    $(TARGET_ROOT_OUT),$(zip_root)/ROOT)
 else ifdef INSTALLED_BUILD_PROP_TARGET
 	@# Copy the system build.prop even if not building a system image
 	@# because add_img_to_target_files may need it to build other partition
