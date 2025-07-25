@@ -7145,12 +7145,8 @@ ifdef BUILT_KERNEL_VERSION_FILE
 	$(hide) cp $(BUILT_KERNEL_VERSION_FILE) $(zip_root)/META/kernel_version.txt
 endif
 	rm -rf $(zip_root)/META/dynamic_partitions_info.txt
-ifeq (true,$(PRODUCT_BUILD_SUPER_PARTITION))
-  ifeq (true,$(PRODUCT_USE_DYNAMIC_PARTITIONS))
-    ifneq ($(BOARD_SUPER_PARTITION_SIZE),)
+ifeq (true,$(PRODUCT_USE_DYNAMIC_PARTITIONS))
 	$(call dump-dynamic-partitions-info, $(zip_root)/META/dynamic_partitions_info.txt)
-    endif
-  endif
 endif
 	PATH=$(INTERNAL_USERIMAGES_BINARY_PATHS):$$PATH MKBOOTIMG=$(MKBOOTIMG) \
 	    $(ADD_IMG_TO_TARGET_FILES) -a -v -p $(HOST_OUT) $(zip_root)
