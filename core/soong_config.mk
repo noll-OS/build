@@ -650,6 +650,8 @@ $(call add_json_map, PartitionVarsForSoongMigrationOnlyDoNotUse)
   # Fastboot
   $(call add_json_str, BoardFastbootInfoFile, $(TARGET_BOARD_FASTBOOT_INFO_FILE))
 
+  $(call add_json_str, VendorBlobsLicense, $(VENDOR_BLOBS_LICENSE))
+
 $(call end_json_map)
 
 # For converting vintf_data
