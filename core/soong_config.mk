@@ -348,8 +348,6 @@ $(call add_json_list, ProductLocales, $(subst _,-,$(PRODUCT_LOCALES)))
 
 $(call add_json_list, ProductDefaultWifiChannels, $(PRODUCT_DEFAULT_WIFI_CHANNELS))
 
-$(call add_json_bool, BoardUseVbmetaDigestInFingerprint, $(filter true,$(BOARD_USE_VBMETA_DIGTEST_IN_FINGERPRINT)))
-
 $(call add_json_list, OemProperties, $(PRODUCT_OEM_PROPERTIES))
 
 $(call add_json_list, SystemPropFiles, $(TARGET_SYSTEM_PROP))
