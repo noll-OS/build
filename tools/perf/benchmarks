@@ -209,7 +209,7 @@ def Clean():
 def CleanNinja():
     """Remove the out directory, and then run lunch to initialize soong"""
     def clean_ninja():
-        returncode = subprocess.call("rm out/*.ninja out/soong/*.ninja", shell=True)
+        returncode = subprocess.call("rm -rf out/*.ninja out/soong/*.ninja out/soong/*.db out/soong/*.gob", shell=True)
         if returncode != 0:
             report_error(f"Build failed: {' '.join(cmd)}")
             raise FatalError()
