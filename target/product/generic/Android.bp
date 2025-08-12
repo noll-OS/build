@@ -921,6 +921,11 @@ system_image_defaults {
                 default: [
                     "framework-platformtelephony",
                 ],
+            }) + select(release_flag("RELEASE_ACONFIG_INCLUDE_CONTACTS_PICKER_APP"), {
+                true: [
+                    "ContactsPicker", // handheld_system (RELEASE_ACONFIG_INCLUDE_CONTACTS_PICKER_APP)
+                ],
+                default: [],
             }),
         },
         prefer32: {
