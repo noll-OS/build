@@ -7874,7 +7874,7 @@ $(INTERNAL_SDK_TARGET): PRIVATE_PLATFORM_NAME := $(sdk_platform_dir_name)
 #
 #SDK_GNU_ERROR := true
 
-$(INTERNAL_SDK_TARGET): $(deps)
+$(INTERNAL_SDK_TARGET): $(deps) | $(BUILD_NUMBER_FILE)
 	@echo "Package SDK: $@"
 	$(hide) rm -rf $(PRIVATE_DIR) $@
 	$(hide) for f in $(strip $(target_gnu_MODULES)); do \
@@ -7904,6 +7904,9 @@ $(INTERNAL_SDK_TARGET): $(deps)
 	        -o $(PRIVATE_DIR) && \
 	    HOST_OUT_EXECUTABLES=$(HOST_OUT_EXECUTABLES) HOST_OS=$(HOST_OS) \
 	        development/build/tools/sdk_clean.sh $(PRIVATE_DIR) && \
+	    if [ "$(TARGET_BUILD_VARIANT)" != "user" ]; then \
+	        sed "s/{BUILD_NUMBER}/`cat $(BUILD_NUMBER_FILE)`/" build/make/core/build_properties_template.xml > $(PRIVATE_DIR)/build_properties.xml; \
+	    fi && \
 	    chmod -R ug+rwX $(PRIVATE_DIR) && \
 	    cd $(dir $@) && zip -rqX $(notdir $@) $(PRIVATE_NAME) \
 	) || ( rm -rf $(PRIVATE_DIR) $@ && exit 44 )
