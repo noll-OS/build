@@ -160,7 +160,7 @@ endif
 
 ifeq ($(RELEASE_TELEPHONY_MODULE),true)
     PRODUCT_APEX_BOOT_JARS += \
-        com.android.telephony2:framework-telephony \
+        com.android.telephonycore:framework-telephony \
 
 else
     PRODUCT_BOOT_JARS += \
