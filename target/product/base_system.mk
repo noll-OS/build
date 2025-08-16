@@ -390,7 +390,7 @@ endif
 
 ifeq ($(RELEASE_TELEPHONY_MODULE),true)
     PRODUCT_PACKAGES += \
-       com.android.telephony2
+       com.android.telephonycore
 
 else
     PRODUCT_PACKAGES += \
