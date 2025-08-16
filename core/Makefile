@@ -7904,7 +7904,8 @@ $(INTERNAL_SDK_TARGET): $(deps) | $(BUILD_NUMBER_FILE)
 	        -o $(PRIVATE_DIR) && \
 	    HOST_OUT_EXECUTABLES=$(HOST_OUT_EXECUTABLES) HOST_OS=$(HOST_OS) \
 	        development/build/tools/sdk_clean.sh $(PRIVATE_DIR) && \
-	    if [ "$(TARGET_BUILD_VARIANT)" != "user" ]; then \
+	    if [ "$(TARGET_BUILD_VARIANT)" != "user" ] && \
+	       { [ "$(PRODUCT_NAME)" = "sdk" ] || [ "$(PRODUCT_NAME)" = "sdk_with_runtime_apis" ]; }; then \
 	        sed -e "s/{BUILD_NUMBER}/`cat $(BUILD_NUMBER_FILE)`/" -e "s/{PRODUCT_EXPORT_RUNTIME_APIS}/$(PRODUCT_EXPORT_RUNTIME_APIS)/" build/make/core/build_properties_template.xml > $(PRIVATE_DIR)/build_properties.xml; \
 	    fi && \
 	    chmod -R ug+rwX $(PRIVATE_DIR) && \
