@@ -269,9 +269,7 @@ import logging
 import multiprocessing
 import os
 import os.path
-import re
 import shutil
-import subprocess
 import sys
 import zipfile
 
@@ -281,7 +279,7 @@ import ota_utils
 import payload_signer
 from ota_utils import (VABC_COMPRESSION_PARAM_SUPPORT, FinalizeMetadata, GetPackageMetadata,
                        PayloadGenerator, SECURITY_PATCH_LEVEL_PROP_NAME, ExtractTargetFiles, CopyTargetFilesDir, TARGET_FILES_IMAGES_SUBDIR)
-from common import DoesInputFileContain, IsSparseImage
+from common import DoesInputFileContain
 import target_files_diff
 from non_ab_ota import GenerateNonAbOtaPackage
 from payload_signer import PayloadSigner
@@ -1015,8 +1013,6 @@ def GenerateAbOtaPackage(target_file, output_file, source_file=None):
     env_override["LD_PRELOAD"] = liblz4_path + \
         ":" + os.environ.get("LD_PRELOAD", "")
 
-  if OPTIONS.disable_vabc:
-    additional_args += ["--disable_vabc=true"]
   if OPTIONS.enable_vabc_xor:
     additional_args += ["--enable_vabc_xor=true"]
   if OPTIONS.compressor_types:
@@ -1143,8 +1139,6 @@ def main(argv):
       OPTIONS.extracted_input = a
     elif o == "--skip_postinstall":
       OPTIONS.skip_postinstall = True
-    elif o == "--retrofit_dynamic_partitions":
-      raise ValueError("Retrofit dynamic partitions is no longer supported")
     elif o == "--skip_compatibility_check":
       OPTIONS.skip_compatibility_check = True
     elif o == "--output_metadata_path":
@@ -1169,7 +1163,9 @@ def main(argv):
       custom_partition, custom_image = a.split("=")
       OPTIONS.custom_images[custom_partition] = custom_image
     elif o == "--disable_vabc":
-      OPTIONS.disable_vabc = True
+      raise ValueError("disabling Virtual AB compression is no longer supported."
+                       "VABC has greatly improved over the years and greatly outperforms"
+                       "VAB in every aspect. We have deprecated plain VAB in android 16")
     elif o == "--spl_downgrade":
       OPTIONS.spl_downgrade = True
       OPTIONS.wipe_user_data = True
