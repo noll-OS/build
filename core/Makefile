@@ -3178,24 +3178,8 @@ VENDOR_NOTICE_DEPS += $(INSTALLED_VENDOR_DEBUG_BOOTIMAGE_TARGET)
 
 endif # BUILDING_DEBUG_VENDOR_BOOT_IMAGE
 
-# Appends a few test harness specific properties into the adb_debug.prop.
-ADDITIONAL_TEST_HARNESS_PROPERTIES := ro.audio.silent=1
-ADDITIONAL_TEST_HARNESS_PROPERTIES += ro.test_harness=1
-
 INTERNAL_DEBUG_RAMDISK_ADB_DEBUG_PROP_TARGET := $(strip $(filter $(TARGET_DEBUG_RAMDISK_OUT)/adb_debug.prop,$(INTERNAL_DEBUG_RAMDISK_FILES)))
 INTERNAL_TEST_HARNESS_RAMDISK_ADB_DEBUG_PROP_TARGET := $(TARGET_TEST_HARNESS_RAMDISK_OUT)/adb_debug.prop
-$(INTERNAL_TEST_HARNESS_RAMDISK_ADB_DEBUG_PROP_TARGET): $(INTERNAL_DEBUG_RAMDISK_ADB_DEBUG_PROP_TARGET)
-	$(hide) rm -f $@
-	$(hide) mkdir -p $(dir $@)
-ifdef INTERNAL_DEBUG_RAMDISK_ADB_DEBUG_PROP_TARGET
-	$(hide) cp $(INTERNAL_DEBUG_RAMDISK_ADB_DEBUG_PROP_TARGET) $@
-endif
-	$(hide) echo "" >> $@
-	$(hide) echo "#" >> $@
-	$(hide) echo "# ADDITIONAL TEST HARNESS PROPERTIES" >> $@
-	$(hide) echo "#" >> $@
-	$(hide) $(foreach line,$(ADDITIONAL_TEST_HARNESS_PROPERTIES), \
-	          echo "$(line)" >> $@;)
 
 $(call declare-1p-target,$(INTERNAL_TEST_HARNESS_RAMDISK_ADB_DEBUG_PROP_TARGET))
 
