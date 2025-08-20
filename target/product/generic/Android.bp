@@ -926,6 +926,11 @@ system_image_defaults {
                     "ContactsPicker", // handheld_system (RELEASE_ACONFIG_INCLUDE_CONTACTS_PICKER_APP)
                 ],
                 default: [],
+            }) + select(release_flag("RELEASE_CROSS_DEVICE_SYNC"), {
+                true: [
+                    "CrossDeviceSync", // base_system (RELEASE_CROSS_DEVICE_SYNC)
+                ],
+                default: [],
             }),
         },
         prefer32: {
