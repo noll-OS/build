@@ -1999,22 +1999,6 @@ else
   installed_system_dlkm_notice_xml_gz :=
 endif
 
-ALL_INSTALLED_NOTICE_FILES := \
-  $(installed_notice_html_or_xml_gz) \
-  $(installed_vendor_notice_xml_gz) \
-  $(installed_product_notice_xml_gz) \
-  $(installed_system_ext_notice_xml_gz) \
-  $(installed_odm_notice_xml_gz) \
-  $(installed_vendor_dlkm_notice_xml_gz) \
-  $(installed_odm_dlkm_notice_xml_gz) \
-  $(installed_system_dlkm_notice_xml_gz) \
-
-# $1 installed file path, e.g. out/target/product/vsoc_x86_64/system_ext/etc/NOTICE.xml.gz
-define is-notice-file
-$(if $(filter true,$(PRODUCT_USE_SOONG_NOTICE_XML)),, \
-  $(if $(findstring $1,$(ALL_INSTALLED_NOTICE_FILES)),Y))
-endef
-
 # Notice files are copied to TARGET_OUT_NOTICE_FILES as a side-effect of their module
 # being built. A notice xml file must depend on all modules that could potentially
 # install a license file relevant to it.
