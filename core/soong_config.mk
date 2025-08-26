@@ -474,6 +474,7 @@ $(call add_json_map, PartitionVarsForSoongMigrationOnlyDoNotUse)
   $(call add_json_str, BootloaderFilePath, $(BOOTLOADER_FILE_PATH))
   $(call add_json_list, AbOtaBootloaderPartitions, $(AB_OTA_BOOTLOADER_PARTITIONS))
   $(call add_json_str, BoardRadioImagePath, $(BOARD_RADIO_IMAGE_PATH))
+  $(call add_json_str, BoardPrebuiltTzswImagePath, $(BOARD_PREBUILT_TZSW_IMAGE_PATH))
 
   # pvmfw
   $(call add_json_bool, BoardUsesPvmfwImage, $(BOARD_USES_PVMFWIMAGE))
