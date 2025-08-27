@@ -6429,6 +6429,13 @@ define copy-image-and-generate-map
   )
 endef
 
+HAS_ANY_EROFS_PARTITION :=
+$(foreach image_type,INIT_BOOT BOOT VENDOR_BOOT VENDOR_KERNEL_BOOT SYSTEM VENDOR CACHE USERDATA PRODUCT SYSTEM_EXT OEM ODM VENDOR_DLKM ODM_DLKM SYSTEM_DLKM VBMETA VBMETA_SYSTEM VBMETA_VENDOR VBMETA_SYSTEM_DLKM VBMETA_VENDOR_DLKM, \
+  $(if $(BUILDING_$(image_type)_IMAGE), \
+    $(if $(filter erofs,$(BOARD_$(image_type)IMAGE_FILE_SYSTEM_TYPE)), \
+      $(eval HAS_ANY_EROFS_PARTITION := true))))
+.KATI_READONLY := HAS_ANY_EROFS_PARTITION
+
 # By conditionally including the dependency of the target files package on the
 # full system image deps, we speed up builds that do not build the system
 # image.
@@ -7022,8 +7029,10 @@ ifdef BOARD_KERNEL_PAGESIZE
 	$(hide) echo "$(BOARD_KERNEL_PAGESIZE)" > $(zip_root)/INIT_BOOT/pagesize
 endif # BOARD_KERNEL_PAGESIZE
 endif # BUILDING_INIT_BOOT_IMAGE
+ifdef HAS_ANY_EROFS_PARTITION
 ifdef BOARD_EROFS_COMPRESS_HINTS
 	$(hide) cp $(BOARD_EROFS_COMPRESS_HINTS) $(zip_root)/META/erofs_default_compress_hints.txt
+endif
 endif
 ifdef BOARD_SYSTEMIMAGE_EROFS_COMPRESS_HINTS
 	$(hide) cp $(BOARD_SYSTEMIMAGE_EROFS_COMPRESS_HINTS) $(zip_root)/META/system_erofs_compress_hints.txt
