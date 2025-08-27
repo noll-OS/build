@@ -38,6 +38,7 @@ PRODUCT_PACKAGES += \
 
 ifeq ($(RELEASE_PACKAGE_COMPUTER_CONTROL),true)
   PRODUCT_PACKAGES += VirtualDeviceManager
+  PRODUCT_PACKAGES += preinstalled-packages-media-system.xml
 endif
 
 PRODUCT_HOST_PACKAGES += \
