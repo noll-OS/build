@@ -471,6 +471,9 @@ $(call soong_config_set_bool,fp_hal_feature,FPC_CONFIG_TRUSTY_SC,$(if $(filter 1
 $(call soong_config_set_bool,fp_hal_feature,GOOGLE_CONFIG_PERFORMANCE,$(if $(filter 1,$(GOOGLE_CONFIG_PERFORMANCE)),true,false))
 $(call soong_config_set_bool,fp_hal_feature,GOOGLE_CONFIG_TOUCH_TO_UNLOCK_ANYTIME,$(if $(filter 1,$(GOOGLE_CONFIG_TOUCH_TO_UNLOCK_ANYTIME)),true,false))
 
+# Flag for building static_apexer_tools
+$(call soong_config_set_bool,ANDROID,BUILD_HOST_static,$(if $(filter true 1,$(BUILD_HOST_static)),true,false))
+
 # Flags for CLOCKWORK
 $(call soong_config_set_bool,CLOCKWORK,CLOCKWORK_EMULATOR_PRODUCT,$(if $(filter true,$(CLOCKWORK_EMULATOR_PRODUCT)),true,false))
 $(call soong_config_set_bool,CLOCKWORK,CLOCKWORK_ENABLE_HEALTH_SERVICES_HAL,$(if $(filter true,$(CLOCKWORK_ENABLE_HEALTH_SERVICES_HAL)),true,false))
