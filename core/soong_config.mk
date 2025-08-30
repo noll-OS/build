@@ -654,6 +654,8 @@ $(call add_json_map, PartitionVarsForSoongMigrationOnlyDoNotUse)
 
   $(call add_json_str, VendorBlobsLicense, $(VENDOR_BLOBS_LICENSE))
 
+  $(call add_json_bool, MinimalFontFootprint, $(filter true,$(MINIMAL_FONT_FOOTPRINT)))
+
 $(call end_json_map)
 
 # For converting vintf_data

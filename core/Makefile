@@ -7245,12 +7245,6 @@ dexpreopt_config_zip: $(DEXPREOPT_CONFIG_ZIP)
 $(call declare-1p-target,$(DEXPREOPT_CONFIG_ZIP),)
 
 # -----------------------------------------------------------------
-# Zips of the symbols directory per test suites
-#
-
-$(foreach suite,$(ALL_COMPATIBILITY_SUITES),$(eval $(call create-suite-symbols-map,$(suite))))
-
-# -----------------------------------------------------------------
 # A zip of the symbols directory.  Keep the full paths to make it
 # more obvious where these files came from.
 # Also produces a textproto containing mappings from elf IDs to symbols
@@ -7880,7 +7874,7 @@ $(INTERNAL_SDK_TARGET): PRIVATE_PLATFORM_NAME := $(sdk_platform_dir_name)
 #
 #SDK_GNU_ERROR := true
 
-$(INTERNAL_SDK_TARGET): $(deps)
+$(INTERNAL_SDK_TARGET): $(deps) | $(BUILD_NUMBER_FILE)
 	@echo "Package SDK: $@"
 	$(hide) rm -rf $(PRIVATE_DIR) $@
 	$(hide) for f in $(strip $(target_gnu_MODULES)); do \
@@ -7910,6 +7904,10 @@ $(INTERNAL_SDK_TARGET): $(deps)
 	        -o $(PRIVATE_DIR) && \
 	    HOST_OUT_EXECUTABLES=$(HOST_OUT_EXECUTABLES) HOST_OS=$(HOST_OS) \
 	        development/build/tools/sdk_clean.sh $(PRIVATE_DIR) && \
+	    if [ "$(TARGET_BUILD_VARIANT)" != "user" ] && \
+	       { [ "$(PRODUCT_NAME)" = "sdk" ] || [ "$(PRODUCT_NAME)" = "sdk_with_runtime_apis" ]; }; then \
+	        sed -e "s/{BUILD_NUMBER}/`cat $(BUILD_NUMBER_FILE)`/" -e "s/{PRODUCT_EXPORT_RUNTIME_APIS}/$(PRODUCT_EXPORT_RUNTIME_APIS)/" build/make/core/build_properties_template.xml > $(PRIVATE_DIR)/build_properties.xml; \
+	    fi && \
 	    chmod -R ug+rwX $(PRIVATE_DIR) && \
 	    cd $(dir $@) && zip -rqX $(notdir $@) $(PRIVATE_NAME) \
 	) || ( rm -rf $(PRIVATE_DIR) $@ && exit 44 )
