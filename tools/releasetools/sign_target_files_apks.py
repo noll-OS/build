@@ -898,6 +898,7 @@ def ProcessTargetFiles(input_tf_zip: zipfile.ZipFile, output_tf_zip: zipfile.Zip
     # Updates pvmfw embedded public key with the virt APEX payload key.
     elif filename == "PREBUILT_IMAGES/pvmfw.img":
       # Find the path of the virt APEX in the target files.
+      copy_pvmfw_verbatim = True
       namelist = input_tf_zip.namelist()
       apex_gen = (f for f in namelist if IsApexFile(f))
       virt_apex_re = re.compile("^.*com\.([^\.]+\.)?android\.virt\.apex$")
@@ -926,6 +927,7 @@ def ProcessTargetFiles(input_tf_zip: zipfile.ZipFile, output_tf_zip: zipfile.Zip
         if new_pubkey:
           print("Replacing %s embedded key with %s key" % (filename,
                                                            virt_apex_path))
+          copy_pvmfw_verbatim = False
           pubkey_info = copy.copy(
               input_tf_zip.getinfo("PREBUILT_IMAGES/pvmfw_embedded.avbpubkey"))
           old_pubkey = input_tf_zip.read(pubkey_info.filename)
@@ -941,6 +943,10 @@ def ProcessTargetFiles(input_tf_zip: zipfile.ZipFile, output_tf_zip: zipfile.Zip
           common.ZipWriteStr(output_tf_zip, pubkey_info, new_pubkey)
         else:
           print("Skip updating public key in %s: no new_pubkey" % filename)
+
+        if copy_pvmfw_verbatim:
+          common.ZipWriteStr(output_tf_zip, out_info, data)
+
 
     elif filename == "PREBUILT_IMAGES/pvmfw_embedded.avbpubkey":
       pass
