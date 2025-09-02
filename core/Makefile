@@ -6575,6 +6575,14 @@ $(BUILT_TARGET_FILES_DIR): $(INSTALLED_BOOTLOADER_MODULE)
 droidcore-unbundled: $(INSTALLED_BOOTLOADER_MODULE)
 endif
 
+# Add a dependency for the signed desktop firmware. We need it included in the
+# target_files.zip so that the unsigned firmware can be swapped with the signed
+# firmware when the target files are signed.
+DESKTOP_SIGNED_FW_ZIP := $(call module-built-files,desktop-firmware-zip-signed)
+ifneq ($(DESKTOP_SIGNED_FW_ZIP),)
+  $(BUILT_TARGET_FILES_DIR): $(DESKTOP_SIGNED_FW_ZIP)
+endif
+
 # Depending on the various images guarantees that the underlying
 # directories are up-to-date.
 $(BUILT_TARGET_FILES_DIR): \
@@ -6968,6 +6976,10 @@ ifeq ($(BOARD_USES_PVMFWIMAGE),true)
 	$(hide) cp $(INSTALLED_PVMFW_EMBEDDED_AVBKEY_TARGET) $(zip_root)/PREBUILT_IMAGES/
 	$(hide) mkdir -p $(zip_root)/PVMFW
 	$(hide) cp $(INSTALLED_PVMFW_BINARY_TARGET) $(zip_root)/PVMFW/
+endif
+ifneq ($(DESKTOP_SIGNED_FW_ZIP),)
+	$(hide) mkdir -p $(zip_root)/SIGNED_PREBUILTS
+	$(hide) cp $(DESKTOP_SIGNED_FW_ZIP) $(zip_root)/SIGNED_PREBUILTS/ap-ec-fw-signed.zip
 endif
 ifdef BOARD_PREBUILT_BOOTLOADER
 	$(hide) mkdir -p $(zip_root)/IMAGES
