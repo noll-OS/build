@@ -200,6 +200,7 @@ $(call add_json_str,  UserdataPath,                      $(TARGET_COPY_OUT_DATA)
 $(call add_json_bool, BuildingUserdataImage,             $(BUILDING_USERDATA_IMAGE))
 
 $(call add_json_bool, UseRBE,                            $(filter-out false,$(USE_RBE)))
+$(call add_json_bool, UseREWrapper,                      $(filter-out false,$(USE_REWRAPPER)))
 $(call add_json_bool, UseRBEJAVAC,                       $(filter-out false,$(RBE_JAVAC)))
 $(call add_json_bool, UseRBER8,                          $(filter-out false,$(RBE_R8)))
 $(call add_json_bool, UseRBED8,                          $(filter-out false,$(RBE_D8)))
