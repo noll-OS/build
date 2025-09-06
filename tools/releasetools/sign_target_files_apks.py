@@ -951,6 +951,23 @@ def ProcessTargetFiles(input_tf_zip: zipfile.ZipFile, output_tf_zip: zipfile.Zip
     elif filename == "PREBUILT_IMAGES/pvmfw_embedded.avbpubkey":
       pass
 
+    elif filename == "VENDOR/firmware/ap-ec-fw.zip":
+      signed_firmware_data = None
+      try:
+        signed_firmware_data = input_tf_zip.read("SIGNED_PREBUILTS/ap-ec-fw-signed.zip")
+        print("Found signed AP/EC firmware.")
+      except KeyError:
+        # TODO(b/435006163): Remove this branch once all target_files.zip
+        # contain signed firmware.
+        print("No signed AP/EC firmware found, using existing.")
+        signed_firmware_data = data
+
+      common.ZipWriteStr(output_tf_zip, out_info, signed_firmware_data)
+
+    elif filename == "SIGNED_PREBUILTS/ap-ec-fw-signed.zip":
+      # Skip the signed file since it was copied above.
+      continue
+
     # Should NOT sign boot-debug.img.
     elif filename in (
         "BOOT/RAMDISK/force_debuggable",
