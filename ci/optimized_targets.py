@@ -444,7 +444,12 @@ class GeneralTestsOptimizer(OptimizedBuildTarget):
     # real symlinks stored in the Build System.
     # https://source.corp.google.com/h/googleplex-android/platform/superproject/main/+/main:build/soong/test_suites/test_suites.go?q=%22pathForPackaging(ctx,%20suiteConfig.name)%22&sq=android
     soong_out = os.path.join(
-        soong_vars.get('OUT_DIR'), "soong", "packaging", "general-tests")
+        soong_vars.get('OUT_DIR'), 'soong', 'packaging', 'general-tests')
+    if java_coverage_enabled():
+      general_tests_jacoco_out = os.path.join(
+          soong_vars.get('OUT_DIR'), 'soong', 'packaging', 'general-tests_jacoco_report_classes.jar')
+      if os.path.exists(general_tests_jacoco_out):
+        shutil.copy(general_tests_jacoco_out, dist_dir)
 
     for p in deduplicated_host_outputs:
       file_path = os.path.join(str(src_top), p)
