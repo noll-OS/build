@@ -144,8 +144,7 @@ BUILD_OS := $(HOST_OS)
 
 # We can do the cross-build only on Linux
 ifeq ($(HOST_OS),linux)
-  # Windows has been the default host_cross OS
-  ifeq (,$(filter-out windows,$(HOST_CROSS_OS)))
+  ifeq ($(HOST_CROSS_OS),windows)
     # We can only create static host binaries for Linux, so if static host
     # binaries are requested, turn off Windows cross-builds.
     ifeq ($(BUILD_HOST_static),)
@@ -158,7 +157,7 @@ ifeq ($(HOST_OS),linux)
     ifeq (,$(HOST_CROSS_ARCH))
       $(error HOST_CROSS_ARCH missing.)
     endif
-  else
+  else ifneq ($(HOST_CROSS_OS),)
     $(error Unsupported HOST_CROSS_OS $(HOST_CROSS_OS))
   endif
 else ifeq ($(HOST_OS),darwin)
