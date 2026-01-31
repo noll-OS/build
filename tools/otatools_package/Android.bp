@@ -215,6 +215,7 @@ java_genrule_host {
     compile_multilib: "first",
     cmd: "$(location merge_zips) $(out) $(in)",
     srcs: [
+        "//device/common:otatools_files",
         ":otatools_package_cert_files",
         ":otatools_package_dep_bins",
         ":otatools_package_dep_jars",
