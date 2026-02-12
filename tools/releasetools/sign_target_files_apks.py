@@ -294,16 +294,29 @@ def GetApkCerts(certmap):
   if OPTIONS.override_apk_keys is not None:
     for apk in certmap.keys():
       certmap[apk] = OPTIONS.override_apk_keys
+    remaining_apks = set()
+  else:
+    remaining_apks = set(certmap)
 
   # apply the key remapping to the contents of the file
   for apk, cert in certmap.items():
-    certmap[apk] = OPTIONS.key_map.get(cert, cert)
+    if cert in OPTIONS.key_map:
+      certmap[apk] = OPTIONS.key_map[cert]
+      remaining_apks.discard(apk)
+    elif cert == "PRESIGNED":
+      remaining_apks.discard(apk)
 
   # apply all the -e options, overriding anything in the file
   for apk, cert in OPTIONS.extra_apks.items():
     if not cert:
       cert = "PRESIGNED"
     certmap[apk] = OPTIONS.key_map.get(cert, cert)
+    remaining_apks.discard(apk)
+
+  # drop the test certificates that weren't remapped to make signing sequence fail if there are
+  # missing release certificates
+  for apk in remaining_apks:
+    del certmap[apk]
 
   return certmap
 
