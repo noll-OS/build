@@ -1444,6 +1444,7 @@ def BuildKeyMap(misc_info, key_mapping_options):
           devkeydir + "/sdk_sandbox": d + "/sdk_sandbox",
           devkeydir + "/bluetooth": d + "/bluetooth",
           devkeydir + "/gmscompat_lib": d + "/gmscompat_lib",
+          devkeydir + "/nfc": d + "/nfc",
       })
     else:
       OPTIONS.key_map[s] = d
